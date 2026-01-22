@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/responsive_home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,6 +53,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ElevatedButton(
               onPressed: toggleText,
               child: const Text('Click Me'),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ResponsiveHome()),
+                );
+              },
+              icon: const Icon(Icons.devices),
+              label: const Text('View Responsive Layout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
             ),
           ],
         ),
