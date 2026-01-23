@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+import 'screens/login_screen.dart';
 import 'screens/responsive_home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -10,9 +18,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WelcomeScreen(),
+      home: WelcomeScreen(),
     );
   }
 }
@@ -37,38 +45,51 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome'),
+        title: const Text('LeafLine'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              clicked ? 'Button Clicked!' : 'Hello Flutter',
+              clicked ? 'Welcome to LeafLine' : 'Smart Mobile Experience',
               style: const TextStyle(fontSize: 22),
             ),
             const SizedBox(height: 20),
-            const Icon(Icons.flutter_dash, size: 80),
+            const Icon(Icons.eco, size: 80, color: Colors.green),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: toggleText,
-              child: const Text('Click Me'),
+              child: const Text('Toggle Text'),
             ),
             const SizedBox(height: 30),
-            ElevatedButton.icon(
+
+            // LOGIN BUTTON (Sprint-2 Entry Point)
+            ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ResponsiveHome()),
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
                 );
               },
-              icon: const Icon(Icons.devices),
-              label: const Text('View Responsive Layout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
+              child: const Text('Get Started'),
+            ),
+
+            const SizedBox(height: 15),
+
+            // OPTIONAL: Access responsive layout after login later
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ResponsiveHome(),
+                  ),
+                );
+              },
+              child: const Text('View Responsive Layout'),
             ),
           ],
         ),
