@@ -225,3 +225,4 @@ Responsive design significantly improves real-world app usability by:
 
 ### Reflection
 During setup, I faced challenges related to environment configuration and emulator performance on Windows. Resolving PATH issues and ensuring all Android SDK components were correctly installed helped stabilize the workflow. This setup now allows me to build, test, and debug Flutter applications efficiently, enabling faster iteration and smoother Firebase integration in later tasks.
+Understanding the Flutter project structure helps maintain clean separation of concerns, improves team collaboration, and makes the application easier to scale and debug as new features are added.
