@@ -19,16 +19,162 @@ LeafLine is a comprehensive Flutter application demonstrating modern mobile deve
 - **Auth Service**: Centralized authentication logic with error handling
 - **Security Implementation**: Secure user data handling and session management
 
-### ✅ Task 3: Widget Tree & Reactive UI Model ⬅️ **CURRENT TASK**
+### ✅ Task 3: Widget Tree & Reactive UI Model
 - **Widget Tree Architecture**: Comprehensive hierarchical widget structure demonstration
 - **Reactive UI Implementation**: Multiple state variables with setState() management
 - **Interactive Demonstrations**: Real-time state changes and UI updates
 - **Performance Optimization**: Selective widget rebuilding and efficient rendering
 - **Educational Visualization**: Interactive widget tree exploration screen
 
+### ✅ Task 4: Stateless vs Stateful Widgets Demo ⬅️ **LATEST ADDITION**
+- **Comprehensive Widget Examples**: Complete demonstration of both StatelessWidget and StatefulWidget
+- **Interactive Learning Interface**: Visual comparison showing static vs dynamic content
+- **Multiple Stateful Implementations**: Counter, theme toggle, and dynamic color changer
+- **Animation Integration**: Smooth transitions and visual feedback for state changes
+- **Educational Structure**: Clear separation and labeling of widget types
+
 ---
 
-## 🔥 Latest Addition: Widget Tree & Reactive UI Features
+## 🔥 Latest Addition: Stateless vs Stateful Widgets Demo
+
+### Understanding Widget Types in Flutter
+
+Flutter uses two fundamental widget types that serve different purposes in building user interfaces:
+
+#### 1. StatelessWidget - Static Content
+```dart
+class AppTitle extends StatelessWidget {
+  const AppTitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'Interactive Demo App',
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    );
+  }
+}
+```
+
+**Characteristics:**
+- **Immutable**: Cannot change their appearance once built
+- **No State Management**: Don't maintain any internal state
+- **Performance Efficient**: Rebuilt only when parent widget changes
+- **Use Cases**: Headers, labels, static icons, unchanging content
+
+#### 2. StatefulWidget - Dynamic Content
+```dart
+class CounterWidget extends StatefulWidget {
+  const CounterWidget({super.key});
+
+  @override
+  State<CounterWidget> createState() => _CounterWidgetState();
+}
+
+class _CounterWidgetState extends State<CounterWidget> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;  // Triggers UI rebuild
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('Count: $_counter'),
+        ElevatedButton(
+          onPressed: _incrementCounter,
+          child: Text('Increment'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+**Characteristics:**
+- **Mutable State**: Can change appearance based on internal state
+- **setState() Method**: Triggers UI rebuilds when state changes
+- **Lifecycle Management**: Handles widget initialization and cleanup
+- **Use Cases**: Forms, counters, toggles, interactive elements
+
+### Demo App Features
+
+Our comprehensive demo showcases both widget types:
+
+#### Static Section (StatelessWidget Examples):
+1. **App Title**: Fixed header that never changes
+2. **Welcome Message**: Static greeting card
+3. **App Information**: Unchanging description text
+4. **Static Icons**: Fixed visual elements
+
+#### Interactive Section (StatefulWidget Examples):
+
+1. **Animated Counter**:
+   - Real-time counter updates
+   - Visual scale animation on increment
+   - Reset functionality with conditional enabling
+   - Dynamic color changes based on value
+
+2. **Theme Toggle Switch**:
+   - Light/Dark mode toggling
+   - Animated container transitions
+   - Dynamic background and text colors
+   - Smooth visual state changes
+
+3. **Dynamic Color Changer**:
+   - Cycling through multiple colors
+   - Animated color transitions
+   - Shadow effects that match current color
+   - Real-time color name display
+
+### Key Learning Outcomes
+
+#### When to Use StatelessWidget:
+- Static content that doesn't change
+- Display-only components
+- Headers, footers, and labels
+- Icons and images that remain constant
+- Performance-critical static layouts
+
+#### When to Use StatefulWidget:
+- Interactive UI elements
+- Components that respond to user input
+- Data that changes over time
+- Animations and transitions
+- Form inputs and validations
+
+### setState() and the Reactive Model
+
+The demo demonstrates how `setState()` makes Flutter reactive:
+
+```dart
+void _incrementCounter() {
+  setState(() {
+    _counter++;  // Modify state
+  });
+  // Flutter automatically rebuilds the widget
+}
+```
+
+**Process:**
+1. User interacts with UI (button press)
+2. Event handler calls `setState()`
+3. Flutter marks widget as needing rebuild
+4. `build()` method runs with new state
+5. Only affected UI parts are updated
+6. Screen reflects the change instantly
+
+---
+
+## 🔥 Previous Addition: Widget Tree & Reactive UI Features
 
 ### 1. Understanding Widget Tree Structure
 In Flutter, everything is a widget organized in a tree hierarchy:
@@ -264,17 +410,66 @@ Secure user management with:
 ### Project Architecture
 ```
 lib/
-├── main.dart                    # App entry point with reactive welcome screen
-├── firebase_options.dart        # Firebase configuration
+├── main.dart                           # App entry point with reactive welcome screen
+├── firebase_options.dart               # Firebase configuration
 ├── screens/
-│   ├── widget_tree_demo.dart    # Interactive widget tree visualization ⬅️ NEW
-│   ├── login_screen.dart        # Authentication interface
-│   ├── responsive_home.dart     # Responsive layout implementation  
-│   ├── signup_screen.dart       # User registration
-│   └── dashboard_screen.dart    # Main app dashboard
+│   ├── stateless_stateful_demo.dart    # Widget type comparison demo ⬅️ LATEST
+│   ├── widget_tree_demo.dart           # Interactive widget tree visualization
+│   ├── login_screen.dart               # Authentication interface
+│   ├── responsive_home.dart            # Responsive layout implementation  
+│   ├── signup_screen.dart              # User registration
+│   └── dashboard_screen.dart           # Main app dashboard
 └── services/
-    └── auth_service.dart        # Firebase authentication service
+    └── auth_service.dart               # Firebase authentication service
 ```
+
+---
+
+## 🎯 Sprint 2 Learning Reflections
+
+### How do Stateful widgets make Flutter apps dynamic?
+
+**StatefulWidget** is the cornerstone of interactivity in Flutter applications:
+
+1. **State Management**: They maintain internal state that can change during the app's lifecycle
+2. **setState() Method**: Provides a mechanism to notify Flutter when state changes, triggering selective UI rebuilds
+3. **Reactive Updates**: Only the widgets affected by state changes are rebuilt, ensuring optimal performance
+4. **User Interaction**: Enable response to user input like button presses, form submissions, and gestures
+5. **Real-time Updates**: Allow apps to display live data, animations, and dynamic content
+
+**Example from our demo:**
+```dart
+void _incrementCounter() {
+  setState(() {
+    _counter++;  // State change triggers UI update
+  });
+}
+```
+
+### Why is it important to separate static and reactive parts of the UI?
+
+**Performance Optimization:**
+- **StatelessWidget** instances are rebuilt only when their parent changes
+- **StatefulWidget** rebuilds only when internal state changes
+- This separation prevents unnecessary rebuilds of static content
+
+**Code Maintainability:**
+- Clear distinction between static and dynamic components
+- Easier debugging and testing
+- Better code organization and readability
+
+**Resource Efficiency:**
+- Reduced memory usage for static components
+- Faster rendering for unchanged elements
+- Better battery life on mobile devices
+
+**Development Best Practices:**
+- Promotes the principle of least responsibility
+- Makes components more reusable
+- Simplifies state management complexity
+
+**Real-world Impact:**
+In our demo, the static header and info cards remain unchanged while users interact with counters and toggles, demonstrating how Flutter efficiently manages mixed content types.
 
 ---
 
