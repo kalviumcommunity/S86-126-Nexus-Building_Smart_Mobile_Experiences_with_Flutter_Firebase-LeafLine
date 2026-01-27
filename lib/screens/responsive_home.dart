@@ -235,12 +235,15 @@ class ResponsiveHome extends StatelessWidget {
   ) {
     return ElevatedButton.icon(
       onPressed: () {
+       debugPrint('Button clicked: $text');
         if (text == 'Get Started') {
+          debugPrint('Navigating to LoginScreen');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const LoginScreen()),
           );
         } else if (text == 'Learn More') {
+          debugPrint('Opening Learn More dialog');
           showDialog(
             context: context,
             builder: (_) => const AlertDialog(
@@ -249,6 +252,7 @@ class ResponsiveHome extends StatelessWidget {
             ),
           );
         } else {
+          debugPrint('Showing Contact snackbar');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Contact feature coming soon')),
           );
