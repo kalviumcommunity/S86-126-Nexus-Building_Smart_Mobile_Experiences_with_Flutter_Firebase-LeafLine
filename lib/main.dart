@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/responsive_home.dart';
 import 'screens/widget_tree_demo.dart';
+import 'screens/stateless_stateful_demo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -362,6 +363,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 15),
                           ),
                           child: const Text('View Widget Tree Demo', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Stateless vs Stateful Demo Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StatelessStatefulDemo(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          child: const Text('Stateless vs Stateful Demo', style: TextStyle(fontSize: 16)),
                         ),
                       ),
 
