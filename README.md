@@ -1,102 +1,48 @@
-## LeafLine – Smart Mobile Experiences with Flutter & Firebase
+## LeafLine – Scrollable Views with ListView and GridView
 # Project Overview
 
-LeafLine is a Flutter application demonstrating responsive UI design, Firebase authentication, widget architecture, and multi-screen navigation using Flutter’s Navigator and named routes.
+This task focuses on building smooth and efficient scrollable user interfaces in Flutter using ListView and GridView. The implementation demonstrates how Flutter handles large and dynamic data sets while maintaining performance and responsiveness across different screen sizes.
 
-Sprint 2 Scope and Features
-Responsive Flutter UI
+The screen combines a horizontal scrolling ListView and a grid-based layout using GridView, organized within a single scrollable page.
 
-Adaptive layouts for mobile, tablet, and landscape
+Scrollable Layout Design
+ListView Implementation
 
-MediaQuery and LayoutBuilder usage
+A horizontal ListView.builder is used to display a scrollable list of cards.
+The builder constructor ensures that only visible items are rendered, improving memory usage and performance.
 
-Verified across multiple screen sizes
-
-Firebase Authentication
-
-Email and password login and signup
-
-Session-based navigation
-
-Secure user handling with Firebase Authentication
-
-Widget Tree and Reactive UI
-
-Clear widget hierarchy using MaterialApp and Scaffold
-
-Reactive UI implemented with setState
-
-Conditional rendering and animations
-
-Interactive widget tree demo screen
-
-Stateless vs Stateful Widgets
-
-Side-by-side comparison
-
-Counters, toggles, and theme switching
-
-Demonstrates Flutter’s reactive programming model
-
-Sprint 2: Multi-Screen Navigation
-Navigation Approach
-
-The application uses named routes defined in main.dart and Flutter’s Navigator to move between screens in a scalable and structured way.
-
-Route Configuration
-MaterialApp(
-  initialRoute: '/',
-  routes: {
-    '/': (context) => const WelcomeScreen(),
-    '/login': (context) => const LoginScreen(),
-    '/responsive': (context) => const ResponsiveHome(),
-    '/widgetTree': (context) => const WidgetTreeDemo(),
-    '/stateDemo': (context) => const StatelessStatefulDemo(),
+ListView.builder(
+  scrollDirection: Axis.horizontal,
+  itemCount: 5,
+  itemBuilder: (context, index) {
+    return Container(
+      width: 140,
+      margin: EdgeInsets.all(8),
+      child: Center(child: Text('Card ${index + 1}')),
+    );
   },
 );
 
-Navigation Flow
-WelcomeScreen
- ├─ /login
- ├─ /widgetTree
- ├─ /stateDemo
- └─ /responsive
+GridView Implementation
 
-Navigation Usage
-Navigator.pushNamed(context, '/login');
-Navigator.pop(context);
+A GridView.builder is used to display items in a two-column grid layout.
+The grid is embedded inside a SingleChildScrollView using shrinkWrap and disabled internal scrolling to avoid layout conflicts.
 
-Reflection
-How does Navigator manage the screen stack?
-
-Navigator maintains a stack of routes. Each new screen is pushed onto the stack, and popping a route returns the user to the previous screen.
-
-What are the benefits of named routes?
-
-Centralized route management
-
-Cleaner and more maintainable navigation logic
-
-Easier scaling as the application grows
-
-Reduced coupling between UI components and navigation logic
-
-Project Structure
-lib/
-├── main.dart
-├── firebase_options.dart
-├── screens/
-│   ├── login_screen.dart
-│   ├── responsive_home.dart
-│   ├── widget_tree_demo.dart
-│   ├── stateless_stateful_demo.dart
-│   └── signup_screen.dart
-└── services/
-    └── auth_service.dart
-
-Running the Application
-flutter pub get
-flutter run
+GridView.builder(
+  shrinkWrap: true,
+  physics: NeverScrollableScrollPhysics(),
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 10,
+    mainAxisSpacing: 10,
+  ),
+  itemCount: 6,
+  itemBuilder: (context, index) {
+    return Container(
+      child: Center(child: Text('Tile ${index + 1}')),
+    );
+  },
+);
 
 Screenshots
 
@@ -104,41 +50,39 @@ Screenshots
 
 ![alt text](image-2.png)
 
-Navigation transition between screens
+Reflection
+How do ListView and GridView improve UI efficiency?
 
-Sprint 2 Submission Details
+ListView and GridView efficiently manage scrolling content by rendering only the widgets that are visible on screen. This reduces memory usage and improves scrolling performance, especially when dealing with large or dynamic data sets.
+
+Why are builder constructors recommended for large data sets?
+
+Builder constructors such as ListView.builder and GridView.builder create widgets lazily. This means widgets are built only when needed, which significantly improves performance and prevents unnecessary widget creation.
+
+What are common performance pitfalls to avoid with scrolling views?
+
+Common pitfalls include nesting multiple scrollable widgets without controlling physics, rendering large lists without builders, and failing to constrain scrollable widgets inside fixed-height containers. Proper use of builders, constraints, and scroll physics helps avoid these issues.
+
+Running the Application
+flutter pub get
+flutter run
+
+Submission Details
 
 Commit message:
 
-feat: implemented multi-screen navigation using Navigator and routes
+feat: implemented scrollable layouts using ListView and GridView
 
 
 Pull request title:
 
-[Sprint-2] Multi-Screen Navigation – TeamName
-
-Reflection
-Why is responsiveness important in mobile apps?
-
-Responsiveness ensures that applications work consistently across different devices and orientations. A responsive UI improves usability, accessibility, and user experience without requiring separate layouts for each device type.
-
-What challenges did you face while managing layout proportions?
-
-The main challenge was maintaining consistent spacing and alignment when switching between vertical and horizontal layouts. Using Expanded and conditional layout rendering helped resolve proportion issues.
-
-How can you improve the layout for different screen orientations?
-
-The layout can be improved by adding orientation-specific spacing, adaptive font sizes, and additional breakpoints for large tablets and desktop screens.
+[Sprint-2] Scrollable Views with ListView & GridView – TeamName
 
 
 Pull request includes:
 
-Summary of the navigation setup
+Summary of scrollable layout implementation
 
 Screenshots from the README
 
-Reflection on application navigation structure
-
-Outcome
-
-This project demonstrates responsive Flutter UI, Firebase authentication, widget tree structure, reactive UI behavior, and structured multi-screen navigation using Navigator and named routes.
+Reflection on ListView and GridView usage
