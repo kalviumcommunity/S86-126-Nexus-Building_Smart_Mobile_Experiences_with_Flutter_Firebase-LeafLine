@@ -6,6 +6,8 @@ import 'screens/login_screen.dart';
 import 'screens/responsive_home.dart';
 import 'screens/widget_tree_demo.dart';
 import 'screens/stateless_stateful_demo.dart';
+import 'screens/scrollable_views.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +31,8 @@ class MyApp extends StatelessWidget {
         '/responsive': (context) => const ResponsiveHome(),
         '/widgetTree': (context) => const WidgetTreeDemo(),
         '/stateDemo': (context) => const StatelessStatefulDemo(),
+        '/scrollable': (context) => const ScrollableViews(),
+
       },
     );
   }
