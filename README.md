@@ -117,6 +117,19 @@ Pull request title:
 
 [Sprint-2] Multi-Screen Navigation – TeamName
 
+Reflection
+Why is responsiveness important in mobile apps?
+
+Responsiveness ensures that applications work consistently across different devices and orientations. A responsive UI improves usability, accessibility, and user experience without requiring separate layouts for each device type.
+
+What challenges did you face while managing layout proportions?
+
+The main challenge was maintaining consistent spacing and alignment when switching between vertical and horizontal layouts. Using Expanded and conditional layout rendering helped resolve proportion issues.
+
+How can you improve the layout for different screen orientations?
+
+The layout can be improved by adding orientation-specific spacing, adaptive font sizes, and additional breakpoints for large tablets and desktop screens.
+
 
 Pull request includes:
 
