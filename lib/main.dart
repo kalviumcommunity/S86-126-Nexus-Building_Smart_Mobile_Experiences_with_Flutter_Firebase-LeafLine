@@ -8,12 +8,11 @@ import 'screens/widget_tree_demo.dart';
 import 'screens/stateless_stateful_demo.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
+import 'screens/state_management_demo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -33,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/stateDemo': (context) => const StatelessStatefulDemo(),
         '/scrollable': (context) => const ScrollableViews(),
         '/userForm': (context) => const UserInputForm(),
+        '/stateManagement': (context) => const StateManagementDemo(),
       },
     );
   }
@@ -69,8 +69,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       backgroundColor = backgroundColor == Colors.blue
           ? Colors.green
           : backgroundColor == Colors.green
-              ? Colors.orange
-              : Colors.blue;
+          ? Colors.orange
+          : Colors.blue;
     });
   }
 
@@ -193,6 +193,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           Navigator.pushNamed(context, '/userForm');
                         },
                         child: const Text('User Input Form'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/stateManagement');
+                        },
+                        child: const Text('State Management Demo'),
                       ),
                     ],
                   ),
