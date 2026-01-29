@@ -13,19 +13,14 @@ class ScrollableViews extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ListView Section Title
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
                 'ListView Example',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
 
-            // Horizontal ListView
             SizedBox(
               height: 180,
               child: ListView.builder(
@@ -56,19 +51,14 @@ class ScrollableViews extends StatelessWidget {
 
             const Divider(thickness: 2),
 
-            // GridView Section Title
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
                 'GridView Example',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
 
-            // GridView inside SingleChildScrollView
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: GridView.builder(

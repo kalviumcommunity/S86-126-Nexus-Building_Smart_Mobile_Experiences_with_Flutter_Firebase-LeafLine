@@ -8,12 +8,9 @@ import 'screens/widget_tree_demo.dart';
 import 'screens/stateless_stateful_demo.dart';
 import 'screens/scrollable_views.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -32,7 +29,6 @@ class MyApp extends StatelessWidget {
         '/widgetTree': (context) => const WidgetTreeDemo(),
         '/stateDemo': (context) => const StatelessStatefulDemo(),
         '/scrollable': (context) => const ScrollableViews(),
-
       },
     );
   }
@@ -67,11 +63,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   void changeBackgroundColor() {
     setState(() {
-      backgroundColor = backgroundColor == Colors.blue 
-          ? Colors.green 
-          : backgroundColor == Colors.green 
-              ? Colors.orange 
-              : Colors.blue;
+      backgroundColor = backgroundColor == Colors.blue
+          ? Colors.green
+          : backgroundColor == Colors.green
+          ? Colors.orange
+          : Colors.blue;
     });
   }
 
@@ -117,11 +113,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: Column(
                     children: [
                       Text(
-                        clicked ? 'Welcome to LeafLine!' : 'Smart Mobile Experience',
+                        clicked
+                            ? 'Welcome to LeafLine!'
+                            : 'Smart Mobile Experience',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: selectedTheme == 'Dark' ? Colors.white : Colors.black,
+                          color: selectedTheme == 'Dark'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -131,7 +131,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         'Demonstrating Flutter Widget Tree & Reactive UI',
                         style: TextStyle(
                           fontSize: 16,
-                          color: selectedTheme == 'Dark' ? Colors.grey[300] : Colors.grey[600],
+                          color: selectedTheme == 'Dark'
+                              ? Colors.grey[300]
+                              : Colors.grey[600],
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -155,11 +157,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
-                          color: selectedTheme == 'Dark' ? Colors.white : Colors.black,
+                          color: selectedTheme == 'Dark'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // Counter Widget
                       Container(
                         decoration: BoxDecoration(
@@ -175,7 +179,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               children: [
                                 const Text(
                                   'Counter:',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                                 Text(
                                   '$counter',
@@ -214,7 +221,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           children: [
                             const Text(
                               'Theme Selection:',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Row(
@@ -261,8 +271,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: toggleExtraWidget,
-                              icon: Icon(showExtraWidget ? Icons.visibility_off : Icons.visibility),
-                              label: Text(showExtraWidget ? 'Hide Widget' : 'Show Widget'),
+                              icon: Icon(
+                                showExtraWidget
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              label: Text(
+                                showExtraWidget ? 'Hide Widget' : 'Show Widget',
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.purple,
                                 foregroundColor: Colors.white,
@@ -328,11 +344,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: selectedTheme == 'Dark' ? Colors.white : Colors.black,
+                          color: selectedTheme == 'Dark'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                       const SizedBox(height: 15),
-                      
+
                       // LOGIN BUTTON (Sprint-2 Entry Point)
                       SizedBox(
                         width: double.infinity,
@@ -350,7 +368,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                           ),
-                          child: const Text('Get Started', style: TextStyle(fontSize: 16)),
+                          child: const Text(
+                            'Get Started',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
 
@@ -373,7 +394,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                           ),
-                          child: const Text('View Widget Tree Demo', style: TextStyle(fontSize: 16)),
+                          child: const Text(
+                            'View Widget Tree Demo',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
 
@@ -387,7 +411,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const StatelessStatefulDemo(),
+                                builder: (context) =>
+                                    const StatelessStatefulDemo(),
                               ),
                             );
                           },
@@ -396,7 +421,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                           ),
-                          child: const Text('Stateless vs Stateful Demo', style: TextStyle(fontSize: 16)),
+                          child: const Text(
+                            'Stateless vs Stateful Demo',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
 
@@ -415,6 +443,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             );
                           },
                           child: const Text('View Responsive Layout'),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/scrollable');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          child: const Text(
+                            'View Scrollable Views',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                     ],
