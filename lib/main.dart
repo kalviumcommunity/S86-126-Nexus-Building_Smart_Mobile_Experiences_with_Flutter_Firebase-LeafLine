@@ -9,6 +9,7 @@ import 'screens/stateless_stateful_demo.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
+import '../widgets/primary_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -181,11 +182,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         child: const Text('Stateless vs Stateful'),
                       ),
 
-                      ElevatedButton(
+                      PrimaryButton(
+                        label: 'Scrollable Views',
                         onPressed: () {
                           Navigator.pushNamed(context, '/scrollable');
                         },
-                        child: const Text('Scrollable Views'),
                       ),
 
                       ElevatedButton(
