@@ -9,6 +9,7 @@ import 'screens/stateless_stateful_demo.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
+import 'screens/asset_demo.dart';
 import 'widgets/primary_button.dart';
 
 void main() async {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/scrollable': (context) => const ScrollableViews(),
         '/userForm': (context) => const UserInputForm(),
         '/stateManagement': (context) => const StateManagementDemo(),
+        '/assets': (context) => const AssetDemo(),
       },
     );
   }
@@ -203,6 +205,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           Navigator.pushNamed(context, '/stateManagement');
                         },
                         child: const Text('State Management Demo'),
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/assets');
+                        },
+                        child: const Text('Assets Demo'),
                       ),
                     ],
                   ),
