@@ -9,11 +9,13 @@ import 'screens/stateless_stateful_demo.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
-import '../widgets/primary_button.dart';
+import 'widgets/primary_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -70,8 +72,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       backgroundColor = backgroundColor == Colors.blue
           ? Colors.green
           : backgroundColor == Colors.green
-          ? Colors.orange
-          : Colors.blue;
+              ? Colors.orange
+              : Colors.blue;
     });
   }
 
@@ -195,6 +197,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         },
                         child: const Text('User Input Form'),
                       ),
+
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/stateManagement');

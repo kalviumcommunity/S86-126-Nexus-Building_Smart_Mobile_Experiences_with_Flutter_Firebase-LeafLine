@@ -10,18 +10,26 @@ class ResponsiveHome extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return _buildResponsiveLayout(context, constraints);
+            // EXPLICIT breakpoint for assignment clarity
+            if (constraints.maxWidth < 600) {
+              return _buildResponsiveLayout(context, constraints, false);
+            } else {
+              return _buildResponsiveLayout(context, constraints, true);
+            }
           },
         ),
       ),
     );
   }
 
-  Widget _buildResponsiveLayout(BuildContext context, BoxConstraints constraints) {
+  Widget _buildResponsiveLayout(
+    BuildContext context,
+    BoxConstraints constraints,
+    bool isTablet,
+  ) {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
     final screenHeight = screenSize.height;
-    final isTablet = screenWidth > 600;
     final isLandscape = screenWidth > screenHeight;
 
     return Column(
@@ -36,26 +44,21 @@ class ResponsiveHome extends StatelessWidget {
             isLandscape,
           ),
         ),
-        _buildFooter(context, screenWidth, isTablet),
+        _buildFooter(context, screenWidth),
       ],
     );
   }
 
   Widget _buildHeader(BuildContext context, double screenWidth, bool isTablet) {
-    final titleFontSize = isTablet ? 28.0 : 24.0;
-    final subtitleFontSize = isTablet ? 16.0 : 14.0;
-
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
-        vertical: isTablet ? 24.0 : 20.0,
+        vertical: isTablet ? 24 : 20,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.blue.shade600, Colors.blue.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
       ),
       child: Row(
@@ -67,17 +70,16 @@ class ResponsiveHome extends StatelessWidget {
               Text(
                 'LeafLine',
                 style: TextStyle(
-                  fontSize: titleFontSize,
+                  fontSize: isTablet ? 28 : 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 4),
               Text(
                 'Smart Mobile Experience',
                 style: TextStyle(
-                  fontSize: subtitleFontSize,
-                  color: Colors.white.withOpacity(0.9),
+                  fontSize: isTablet ? 16 : 14,
+                  color: Colors.white70,
                 ),
               ),
             ],
@@ -99,10 +101,8 @@ class ResponsiveHome extends StatelessWidget {
     bool isTablet,
     bool isLandscape,
   ) {
-    final padding = screenWidth * 0.05;
-
     return SingleChildScrollView(
-      padding: EdgeInsets.all(padding),
+      padding: EdgeInsets.all(screenWidth * 0.05),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -134,9 +134,9 @@ class ResponsiveHome extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.green.shade200),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text(
             'Welcome to LeafLine',
             style: TextStyle(
@@ -190,7 +190,7 @@ class ResponsiveHome extends StatelessWidget {
     }).toList();
   }
 
-  Widget _buildFooter(BuildContext context, double screenWidth, bool isTablet) {
+  Widget _buildFooter(BuildContext context, double screenWidth) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.grey.shade100,
@@ -213,15 +213,6 @@ class ResponsiveHome extends StatelessWidget {
               Colors.grey,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildActionButton(
-              context,
-              'Contact Us',
-              Icons.contact_mail,
-              Colors.green,
-            ),
-          ),
         ],
       ),
     );
@@ -235,26 +226,20 @@ class ResponsiveHome extends StatelessWidget {
   ) {
     return ElevatedButton.icon(
       onPressed: () {
-       debugPrint('Button clicked: $text');
         if (text == 'Get Started') {
-          debugPrint('Navigating to LoginScreen');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const LoginScreen()),
           );
-        } else if (text == 'Learn More') {
-          debugPrint('Opening Learn More dialog');
+        } else {
           showDialog(
             context: context,
             builder: (_) => const AlertDialog(
               title: Text('About LeafLine'),
-              content: Text('LeafLine uses Flutter and Firebase to build smart, scalable mobile apps.'),
+              content: Text(
+                'LeafLine helps users manage plant care using responsive Flutter interfaces.',
+              ),
             ),
-          );
-        } else {
-          debugPrint('Showing Contact snackbar');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Contact feature coming soon')),
           );
         }
       },
