@@ -1,5 +1,22 @@
-## LeafLine – Scrollable Views with ListView and GridView
+## LeafLine – Smart Mobile Experiences with Flutter
 # Project Overview
+
+This project demonstrates building smooth, efficient, and animated user interfaces in Flutter. The implementation includes scrollable views with ListView and GridView, along with comprehensive animations that bring the app to life with professional transitions and interactive elements.
+
+## Latest Update: Flutter Animations & Transitions ✨
+
+Added comprehensive animation system to enhance user experience:
+- **Implicit animations** using AnimatedContainer, AnimatedOpacity, and AnimatedScale for smooth UI transitions
+- **Explicit animations** with custom AnimationController for complex rotation, pulse, and wave effects  
+- **Custom page transitions** using PageRouteBuilder with slide, fade, scale, and mixed transition effects
+- **Enhanced scrollable views** with staggered entrance animations and interactive feedback
+- **Animated navigation** with different transition effects for each screen
+
+For detailed animation documentation, see [README_ANIMATIONS.md](README_ANIMATIONS.md)
+
+---
+
+## Scrollable Views with ListView and GridView
 
 This task focuses on building smooth and efficient scrollable user interfaces in Flutter using ListView and GridView. The implementation demonstrates how Flutter handles large and dynamic data sets while maintaining performance and responsiveness across different screen sizes.
 
@@ -86,3 +103,15 @@ Summary of scrollable layout implementation
 Screenshots from the README
 
 Reflection on ListView and GridView usage
+
+
+ ## Task Setting Up Firebase Project and Connecting It to Flutter App
+1.Create a Firebase project in the Firebase Console.
+2.Register your Flutter app with Firebase (Android/iOS/Web).
+3.Download google-services.json (Android) or GoogleService-Info.plist (iOS).
+4.Add Firebase SDK dependencies in pubspec.yaml (firebase_core).
+5.Configure Gradle files for Android integration.
+6.Initialize Firebase in main.dart using Firebase.initializeApp().
+7.Run the app and verify it appears in Firebase Console.
+
+
