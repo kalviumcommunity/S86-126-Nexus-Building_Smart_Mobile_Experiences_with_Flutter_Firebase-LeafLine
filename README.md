@@ -114,4 +114,14 @@ Reflection on ListView and GridView usage
 6.Initialize Firebase in main.dart using Firebase.initializeApp().
 7.Run the app and verify it appears in Firebase Console.
 
+## Task : Firebase SDK Integration with FlutterFire CLI
+
+1.This Flutter app is connected to Firebase using FlutterFire CLI.
+2.Firebase provides backend features like authentication, Firestore, cloud storage, and analytics.
+3.FlutterFire CLI automates setup for Android, iOS, and Web.
+4.Installed FlutterFire CLI: dart pub global activate flutterfire_cli.
+5.Logged in to Firebase: firebase login.
+6.Configured Flutter project: flutterfire configure → generated lib/firebase_options.dart.
+7.Added firebase_core dependency and ran flutter pub get.
+8.Initialized Firebase in main.dart using DefaultFirebaseOptions.currentPlatform.
 
