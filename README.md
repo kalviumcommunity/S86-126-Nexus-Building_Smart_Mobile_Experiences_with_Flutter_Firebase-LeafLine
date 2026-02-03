@@ -23,9 +23,6 @@ This task focuses on building smooth and efficient scrollable user interfaces in
 The screen combines a horizontal scrolling ListView and a grid-based layout using GridView, organized within a single scrollable page.
 
 
-A horizontal ListView.builder is used to display a scrollable list of cards.
-The builder constructor ensures that only visible items are rendered, improving memory usage and performance.
-
 ListView.builder(
   scrollDirection: Axis.horizontal,
   itemCount: 5,
