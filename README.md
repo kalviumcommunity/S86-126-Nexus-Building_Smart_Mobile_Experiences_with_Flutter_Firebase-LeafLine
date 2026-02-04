@@ -1,43 +1,4 @@
-## LeafLine – Smart Mobile Experiences with Flutter
-# Project Overview
 
-This project demonstrates building smooth, efficient, and animated user interfaces in Flutter. The implementation includes scrollable views with ListView and GridView, along with comprehensive animations that bring the app to life with professional transitions and interactive elements.
-
-## Latest Update: Flutter Animations & Transitions ✨
-
-Added comprehensive animation system to enhance user experience:
-- **Implicit animations** using AnimatedContainer, AnimatedOpacity, and AnimatedScale for smooth UI transitions
-- **Explicit animations** with custom AnimationController for complex rotation, pulse, and wave effects  
-- **Custom page transitions** using PageRouteBuilder with slide, fade, scale, and mixed transition effects
-- **Enhanced scrollable views** with staggered entrance animations and ifferent transition effects for each screen
-
-For detailed animation documentation, see [README_ANIMATIONS.md](README_ANIMATIONS.md)
-
----
-
-## Scrollable Views with ListView and GridView
-
-This task focuses on building smooth and efficient scrollable user interfaces in Flutter using ListView and GridView. The implementation demonstrates how Flutter handles large and dynamic data sets while maintaining performance and responsiveness across different screen sizes.
-
-The screen combines a horizontal scrolling ListView and a grid-based layout using GridView, organized within a single scrollable page.
-
-
-ListView.builder(
-  scrollDirection: Axis.horizontal,
-  itemCount: 5,
-  itemBuilder: (context, index) {
-    return Container(
-      width: 140,
-      margin: EdgeInsets.all(8),
-      child: Center(child: Text('Card ${index + 1}')),
-    );
-  },
-);
-
-GridView Implementation
-
-A GridView.builder is used to display items in a two-column grid layout.
-The grid is embedded inside a SingleChildScrollView using shrinkWrap and disabled internal scrolling to avoid layout conflicts.
 
 GridView.builder(
   shrinkWrap: true,
@@ -89,33 +50,4 @@ Pull request title:
 
 [Sprint-2] Scrollable Views with ListView & GridView – TeamName
 
-
-Pull request includes:
-
-Summary of scrollable layout implementation
-
-Screenshots from the README
-
-Reflection on ListView and GridView usage
-
-
- ## Task Setting Up Firebase Project and Connecting It to Flutter App
-1.Create a Firebase project in the Firebase Console.
-2.Register your Flutter app with Firebase (Android/iOS/Web).
-3.Download google-services.json (Android) or GoogleService-Info.plist (iOS).
-4.Add Firebase SDK dependencies in pubspec.yaml (firebase_core).
-5.Configure Gradle files for Android integration.
-6.Initialize Firebase in main.dart using Firebase.initializeApp().
-7.Run the app and verify it appears in Firebase Console.
-
-## Task : Firebase SDK Integration with FlutterFire CLI
-
-1.This Flutter app is connected to Firebase using FlutterFire CLI.
-2.Firebase provides backend features like authentication, Firestore, cloud storage, and analytics.
-3.FlutterFire CLI automates setup for Android, iOS, and Web.
-4.Installed FlutterFire CLI: dart pub global activate flutterfire_cli.
-5.Logged in to Firebase: firebase login.
-6.Configured Flutter project: flutterfire configure → generated lib/firebase_options.dart.
-7.Added firebase_core dependency and ran flutter pub get.
-8.Initialized Firebase in main.dart using DefaultFirebaseOptions.currentPlatform.
 
