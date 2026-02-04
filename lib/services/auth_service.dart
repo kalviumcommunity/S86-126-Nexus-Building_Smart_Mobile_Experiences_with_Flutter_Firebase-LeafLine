@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
+
   /// Lazy FirebaseAuth access (SAFE)
   FirebaseAuth get _auth => FirebaseAuth.instance;
 
@@ -17,9 +18,22 @@ class AuthService {
       return null;
     } catch (e) {
       print('Unexpected signup error: $e');
+=======
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<User?> signUp(String email, String password) async {
+    try {
+      final result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return result.user;
+    } catch (e) {
+
       return null;
     }
   }
+
 
   /// Log in a user with email and password
   Future<User?> logIn(String email, String password) async {
@@ -34,9 +48,20 @@ class AuthService {
       return null;
     } catch (e) {
       print('Unexpected login error: $e');
+=======
+  Future<User?> login(String email, String password) async {
+    try {
+      final result = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return result.user;
+    } catch (e) {
+
       return null;
     }
   }
+
 
   /// Log out the current user
   Future<void> logOut() async {
@@ -61,4 +86,9 @@ class AuthService {
 
   /// Get current user's UID
   String? get currentUserUID => _auth.currentUser?.uid;
+=======
+  Future<void> logout() async {
+    await _auth.signOut();
+  }
+
 }

@@ -1,21 +1,36 @@
 {
   "project_info": {
+
     "project_number": "529710790527",
     "project_id": "leafline-dea88",
     "storage_bucket": "leafline-dea88.firebasestorage.app"
+=======
+    "project_number": "361335929418",
+    "project_id": "leaflife-bf53c",
+    "storage_bucket": "leaflife-bf53c.firebasestorage.app"
+
   },
   "client": [
     {
       "client_info": {
+
         "mobilesdk_app_id": "1:529710790527:android:2f731ca113905b53840c4a",
         "android_client_info": {
           "package_name": "com.nexus.leafline"
+=======
+        "mobilesdk_app_id": "1:361335929418:android:36016ec9d078349ed944b3",
+        "android_client_info": {
+          "package_name": "com.example.leafline"
+
         }
       },
       "oauth_client": [],
       "api_key": [
         {
+
           "current_key": "AIzaSyBlU9m5dmbvRhCAgMCzLxhtUwFCEZi97pU"
+=======
+
         }
       ],
       "services": {
