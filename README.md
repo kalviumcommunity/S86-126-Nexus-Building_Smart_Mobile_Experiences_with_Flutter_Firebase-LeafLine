@@ -1,17 +1,6 @@
 
 
-GridView.builder(
-  shrinkWrap: true,
-  physics: NeverScrollableScrollPhysics(),
-  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    crossAxisSpacing: 10,
-    mainAxisSpacing: 10,
-  ),
-  itemCount: 6,
-  itemBuilder: (context, index) {
-    return Container(
-      child: Center(child: Text('Tile ${index + 1}')),
+
     );
   },
 );
