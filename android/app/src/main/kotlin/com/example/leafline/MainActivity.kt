@@ -1,4 +1,4 @@
-package com.example.leafline
+package com.nexus.leafline
 
 import io.flutter.embedding.android.FlutterActivity
 
