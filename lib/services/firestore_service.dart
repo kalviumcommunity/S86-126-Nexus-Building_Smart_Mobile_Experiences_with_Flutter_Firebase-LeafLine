@@ -404,4 +404,85 @@ class FirestoreService {
       rethrow;
     }
   }
+
+  /// Task Management Methods
+  /// Create: Add a task
+  Future<void> addTask(String uid, Map<String, dynamic> taskData) async {
+    try {
+      await _firestore.collection('tasks').add({
+        ...taskData,
+        'userId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Task added successfully');
+    } catch (e) {
+      print('Error adding task: $e');
+      rethrow;
+    }
+  }
+
+  /// Create: Set a task with specific ID
+  Future<void> setTask(String taskId, String uid, Map<String, dynamic> taskData) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).set({
+        ...taskData,
+        'userId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Task set successfully');
+    } catch (e) {
+      print('Error setting task: $e');
+      rethrow;
+    }
+  }
+
+  /// Read: Get tasks stream for a user
+  Stream<QuerySnapshot> getTasksStream(String uid) {
+    return _firestore
+        .collection('tasks')
+        .where('userId', isEqualTo: uid)
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  /// Update: Update a task
+  Future<void> updateTask(String taskId, Map<String, dynamic> data) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).update({
+        ...data,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Task updated successfully');
+    } catch (e) {
+      print('Error updating task: $e');
+      rethrow;
+    }
+  }
+
+  /// Update: Toggle task completion status
+  Future<void> toggleTaskCompletion(String taskId, bool currentStatus) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).update({
+        'completed': !currentStatus,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Task completion toggled successfully');
+    } catch (e) {
+      print('Error toggling task completion: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete: Remove a task
+  Future<void> deleteTask(String taskId) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).delete();
+      print('Task deleted successfully');
+    } catch (e) {
+      print('Error deleting task: $e');
+      rethrow;
+    }
+  }
 }
