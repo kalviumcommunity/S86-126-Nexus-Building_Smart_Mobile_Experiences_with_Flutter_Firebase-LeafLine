@@ -14,7 +14,14 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **Real-Time Statistics**: Live message count and likes counter
 - **CRUD Operations**: Add, delete, and like messages with instant feedback
 
-### 2. Firebase Authentication
+### 2. Firestore Queries & Filtering 🔍
+- **Advanced Queries**: Filter data using `where` conditions
+- **Sorting**: Order results with `orderBy` (ascending/descending)
+- **Pagination**: Limit results for performance optimization
+- **Dynamic UI**: Interactive filter, sort, and limit controls
+- **Query Visualization**: View generated Firestore query structure
+
+### 3. Firebase Authentication
 - User registration and login
 - Secure authentication flow
 - Session management
@@ -68,6 +75,7 @@ lib/
 ├── firebase_options.dart              # Firebase configuration
 ├── screens/
 │   ├── realtime_sync_demo_screen.dart # Real-time sync demo
+│   ├── query_filter_demo_screen.dart  # Queries & filtering demo
 │   ├── login_screen.dart              # User authentication
 │   ├── signup_screen.dart             # User registration
 │   ├── dashboard_screen.dart          # Main dashboard
@@ -185,11 +193,226 @@ if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
 return ListView.builder(...);
 ```
 
+## � Firestore Queries & Filtering Implementation
+
+### Key Features
+
+The **Query & Filter Demo** showcases advanced Firestore querying capabilities with dynamic filtering, sorting, and pagination:
+
+#### 1. Dynamic Query Building
+```dart
+Query<Map<String, dynamic>> _buildQuery() {
+  Query<Map<String, dynamic>> query = 
+      FirebaseFirestore.instance.collection('tasks');
+
+  // Apply filters
+  switch (_selectedFilter) {
+    case 'active':
+      query = query.where('isCompleted', isEqualTo: false);
+      break;
+    case 'high':
+      query = query.where('priority', isEqualTo: 'high');
+      break;
+  }
+
+  // Apply sorting
+  query = query.orderBy(_sortBy, descending: _descending);
+
+  // Apply limit
+  query = query.limit(_limitCount);
+
+  return query;
+}
+```
+
+#### 2. Filter Operations (where queries)
+```dart
+// Equality filter
+.where('status', isEqualTo: 'active')
+
+// Comparison filters
+.where('price', isGreaterThan: 100)
+.where('rating', isLessThanOrEqualTo: 4.5)
+
+// Boolean filters
+.where('isCompleted', isEqualTo: false)
+
+// String filters
+.where('priority', isEqualTo: 'high')
+```
+
+#### 3. Sorting Data (orderBy)
+```dart
+// Ascending order (oldest/lowest first)
+.orderBy('createdAt')
+
+// Descending order (newest/highest first)
+.orderBy('createdAt', descending: true)
+
+// Sort by priority
+.orderBy('priority', descending: true)
+
+// Sort by title alphabetically
+.orderBy('title')
+```
+
+#### 4. Pagination with Limit
+```dart
+// Limit results for performance
+.limit(10)  // First 10 items
+.limit(20)  // First 20 items
+.limit(50)  // First 50 items
+
+// Example: Get top 10 high-priority incomplete tasks
+FirebaseFirestore.instance
+  .collection('tasks')
+  .where('isCompleted', isEqualTo: false)
+  .where('priority', isEqualTo: 'high')
+  .orderBy('createdAt', descending: true)
+  .limit(10)
+  .snapshots()
+```
+
+#### 5. StreamBuilder with Queries
+```dart
+StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('tasks')
+      .where('isCompleted', isEqualTo: false)
+      .orderBy('priority', descending: true)
+      .limit(20)
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return CircularProgressIndicator();
+    }
+    
+    if (snapshot.hasError) {
+      return Text('Error: May need Firestore index');
+    }
+    
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Text('No tasks found');
+    }
+    
+    final tasks = snapshot.data!.docs;
+    return ListView.builder(
+      itemCount: tasks.length,
+      itemBuilder: (context, index) {
+        final task = tasks[index].data() as Map<String, dynamic>;
+        return ListTile(
+          title: Text(task['title']),
+          subtitle: Text('Priority: ${task['priority']}'),
+        );
+      },
+    );
+  }
+)
+```
+
+### How to Test Queries & Filtering
+
+1. **Run the app** and navigate to "🔍 Query & Filter Demo"
+2. **Add test data in Firebase Console**: Go to Firestore → `tasks` collection
+3. **Create sample documents**:
+   ```json
+   {
+     "title": "Complete Flutter Project",
+     "description": "Build real-time sync feature",
+     "priority": "high",
+     "isCompleted": false,
+     "createdAt": Timestamp
+   }
+   ```
+   Create 10-15 tasks with varying priorities (high/medium/low) and completion status
+
+4. **Test Filter Options**:
+   - Tap "FILTER" button → Select "Active Tasks" → See only incomplete tasks
+   - Select "High Priority" → See only high-priority tasks
+   - Select "Completed Tasks" → See only completed tasks
+   - Select "All Tasks" → See everything
+
+5. **Test Sorting**:
+   - Tap "SORT" button → Select "Sort by Date" → Tasks ordered by creation time
+   - Select "Sort by Priority" → Tasks ordered high→medium→low
+   - Select "Sort by Title" → Tasks in alphabetical order
+   - Toggle "Descending" switch → Order reverses
+
+6. **Test Pagination**:
+   - Tap "LIMIT" button → Select "10" → See only first 10 results
+   - Select "50" → See up to 50 results
+   - Useful for large datasets to improve performance
+
+7. **View Query Structure**:
+   - Tap "VIEW QUERY" floating button or info icon
+   - See exact Firestore query code
+   - Understand how filters, sorting, and limits combine
+
+### Query Best Practices Implemented
+
+✅ **Indexing**: App handles index creation prompts from Firestore  
+✅ **Error Handling**: Shows clear messages when indexes are needed  
+✅ **Performance**: Uses `.limit()` to reduce data transfer  
+✅ **Real-time Updates**: StreamBuilder automatically reflects changes  
+✅ **User Feedback**: Loading states, empty states, and result counts  
+✅ **Query Visualization**: Shows generated query structure for learning
+
+### Common Query Patterns
+
+**Pattern 1: Active High-Priority Tasks**
+```dart
+.where('isCompleted', isEqualTo: false)
+.where('priority', isEqualTo: 'high')
+.orderBy('createdAt', descending: true)
+.limit(10)
+```
+
+**Pattern 2: Recent Completed Tasks**
+```dart
+.where('isCompleted', isEqualTo: true)
+.orderBy('createdAt', descending: true)
+.limit(20)
+```
+
+**Pattern 3: Alphabetically Sorted Tasks**
+```dart
+.orderBy('title')
+.limit(50)
+```
+
+### Index Requirements
+
+Some query combinations require composite indexes:
+
+```dart
+// Requires index: [priority, createdAt]
+.where('priority', isEqualTo: 'high')
+.orderBy('createdAt', descending: true)
+
+// Requires index: [isCompleted, priority]
+.where('isCompleted', isEqualTo: false)
+.orderBy('priority')
+```
+
+When you run these queries, Firestore will provide an automatic index creation link in the error message. Click it to create the index automatically.
+
 ## 📱 Screenshots
 
 ### Real-Time Sync Demo
 ![Real-Time Sync Screen](screenshots/realtime_sync_screen.png)
 *Messages update instantly when Firestore data changes*
+
+### Firestore Query & Filter Demo
+![Query Filter Screen](screenshots/query_filter_screen.png)
+*Dynamic filtering, sorting, and pagination controls*
+
+### Filter Options
+![Filter Options](screenshots/filter_options.png)
+*Filter by status (active/completed) or priority (high/medium/low)*
+
+### Query Visualization
+![Query Structure](screenshots/query_structure.png)
+*View the generated Firestore query code*
 
 ### Firebase Console Integration
 ![Firebase Console](screenshots/firebase_console.png)
@@ -254,6 +477,88 @@ Key practices include:
 - ❌ Creating unnecessary widget rebuilds
 - ✅ Using const constructors where possible
 
+### How do Firestore queries improve app performance and UX?
+
+Firestore queries with filters, sorting, and limits dramatically improve performance by:
+
+1. **Reducing Data Transfer**: Instead of fetching entire collections, queries return only relevant documents. A `.limit(20)` on a 10,000-document collection transfers 99.8% less data.
+
+2. **Faster Initial Load**: Smaller result sets mean faster parsing and rendering, improving perceived performance especially on slower devices.
+
+3. **Better UX**: Users see filtered, sorted results immediately without manual searching. Real-time updates via StreamBuilder keep the UI current.
+
+4. **Scalability**: Apps remain fast as data grows. A properly indexed query on 1 million documents performs similarly to 1,000 documents.
+
+5. **Lower Costs**: Firestore charges per document read. Limiting queries directly reduces costs.
+
+### Why is indexing important for Firestore queries?
+
+Indexes are critical for query performance:
+
+**Without Indexes**: Firestore would scan every document (O(n) complexity), making queries slow and expensive.
+
+**With Indexes**: Firestore uses B-tree indexes to jump directly to matching documents (O(log n)), enabling:
+- Sub-second query responses even with millions of documents
+- Efficient filtering and sorting combinations
+- Low resource consumption
+
+**Composite Indexes**: Required when combining `where` filters with `orderBy` on different fields. Firestore automatically prompts you to create these with a single click in the console.
+
+**Best Practice**: Always index fields you query frequently. Our app handles index errors gracefully and guides users to create them.
+
+### Common mistakes and how to avoid them
+
+**1. Ordering without indexes**
+```dart
+// ❌ May fail without composite index
+.where('status', isEqualTo: 'active')
+.orderBy('date', descending: true)
+
+// ✅ Create index via Firebase Console link
+// Index: [status, date]
+```
+
+**2. Filtering on multiple non-indexed fields**
+```dart
+// ❌ Requires composite index
+.where('priority', isEqualTo: 'high')
+.where('category', isEqualTo: 'work')
+
+// ✅ Create index or restructure query
+```
+
+**3. Not using limit for large collections**
+```dart
+// ❌ Fetches all documents (expensive)
+.collection('tasks').snapshots()
+
+// ✅ Limit results
+.collection('tasks').limit(50).snapshots()
+```
+
+**4. Deeply nested queries**
+```dart
+// ❌ Firestore doesn't support nested queries
+.where('user.preferences.theme', isEqualTo: 'dark')
+
+// ✅ Flatten data structure
+.where('userTheme', isEqualTo: 'dark')
+```
+
+**5. Not handling empty states**
+```dart
+// ❌ Crashes when no data
+final tasks = snapshot.data!.docs;
+return ListView.builder(...)
+
+// ✅ Check for empty data
+if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+  return Text('No tasks found');
+}
+```
+
+Our implementation avoids these pitfalls with proper error handling, empty state checks, and clear index error messages.
+
 ### How do ListView and GridView improve UI efficiency?
 
 ListView and GridView efficiently manage scrolling content by rendering only the widgets that are visible on screen. This reduces memory usage and improves scrolling performance, especially when dealing with large or dynamic data sets.
@@ -277,9 +582,11 @@ Common pitfalls include nesting multiple scrollable widgets without controlling 
 
 ## 📝 Submission Details
 
-### Sprint 2 Task: Real-Time Firestore Synchronization
+### Sprint 2 Tasks Completed
 
-**Implementation:** ✅ Complete
+#### Task 1: Real-Time Firestore Synchronization ✅
+
+**Implementation:** Complete
 - Real-time sync demo screen created
 - StreamBuilder implementations
 - Collection and document snapshot listeners
@@ -297,7 +604,7 @@ feat: implemented real-time Firestore sync using snapshot listeners
 [Sprint-2] Real-Time Firestore Synchronization with StreamBuilder – [Your Team Name]
 ```
 
-**PR Description:**
+**PR Description Template:**
 ```
 ## 📱 Real-Time Firestore Synchronization Implementation
 
@@ -349,7 +656,117 @@ StreamBuilder<QuerySnapshot>(
 - Applied professional state management
 ```
 
-### Previous Submissions
+---
+
+#### Task 2: Firestore Queries, Filtering & Ordering ✅
+
+**Implementation:** Complete
+- Query & filter demo screen created
+- Dynamic query building with where, orderBy, limit
+- Interactive filter, sort, and limit controls
+- Query visualization dialog
+- Real-time filtering with StreamBuilder
+- Comprehensive error handling for indexes
+
+**Commit message:**
+```
+feat: implemented Firestore queries, filters, and ordering in UI
+```
+
+**Pull request title:**
+```
+[Sprint-2] Firestore Queries & Filtering – [Your Team Name]
+```
+
+**PR Description Template:**
+```
+## 🔍 Firestore Queries & Filtering Implementation
+
+### ✨ Features Implemented
+- ✅ Dynamic query building with `where`, `orderBy`, `limit`
+- ✅ Interactive filter options (all/active/completed, priority levels)
+- ✅ Sorting controls (date, priority, title - ascending/descending)
+- ✅ Pagination with configurable limits (10/20/50/100)
+- ✅ Query visualization showing generated Firestore code
+- ✅ Real-time UI updates via StreamBuilder
+- ✅ Index error handling with helpful messages
+
+### 🔥 Technical Implementation
+**File:** `lib/screens/query_filter_demo_screen.dart`
+
+**Key Technologies:**
+- Firestore `.where()` for filtering
+- `.orderBy()` for sorting
+- `.limit()` for pagination
+- StreamBuilder for real-time query results
+- Dynamic query construction
+
+**Code Highlights:**
+```dart
+Query<Map<String, dynamic>> _buildQuery() {
+  Query<Map<String, dynamic>> query = 
+      FirebaseFirestore.instance.collection('tasks');
+  
+  // Dynamic filtering
+  if (_selectedFilter == 'active') {
+    query = query.where('isCompleted', isEqualTo: false);
+  }
+  
+  // Sorting
+  query = query.orderBy(_sortBy, descending: _descending);
+  
+  // Pagination
+  query = query.limit(_limitCount);
+  
+  return query;
+}
+```
+
+### 📊 Query Types Used
+1. **Equality Filters**: `.where('priority', isEqualTo: 'high')`
+2. **Boolean Filters**: `.where('isCompleted', isEqualTo: false)`
+3. **Sorting**: `.orderBy('createdAt', descending: true)`
+4. **Limiting**: `.limit(20)`
+5. **Combined Queries**: Filter + Sort + Limit together
+
+### 💡 Why Queries Improve UX
+- **Faster Loading**: Only fetch needed data (20 docs vs 1000+)
+- **Better Organization**: Users see sorted, filtered results instantly
+- **Scalability**: Performance stays consistent as data grows
+- **Real-time Updates**: Changes appear immediately in filtered view
+- **Lower Costs**: Fewer document reads = lower Firebase bills
+
+### 🛠️ Index Handling
+- App gracefully handles missing index errors
+- Shows helpful message: "May require Firestore index"
+- Guides user to create indexes via Firebase Console
+- Example composite index needed: `[priority, createdAt]`
+
+### 📊 Testing
+- ✅ Created 15+ test tasks with varying priorities and statuses
+- ✅ Tested all filter combinations (active/completed/priority)
+- ✅ Verified sorting by date, priority, and title
+- ✅ Confirmed pagination limits (10/20/50/100)
+- ✅ Tested real-time updates with filters applied
+- ✅ Validated index error handling
+
+### 📸 Screenshots
+[Add your screenshots of query filter screen, filter options, query visualization]
+
+### 🎥 Demo Video
+[Add your video showing filtering, sorting, and Firebase Console sync]
+
+### 🎓 Learning Outcomes
+- Mastered Firestore query construction
+- Understood indexing requirements
+- Implemented efficient data filtering
+- Applied real-time queries with StreamBuilder
+- Learned query optimization best practices
+```
+
+---
+
+### Previous Tasks
 
 **Scrollable Views:**
 ```
