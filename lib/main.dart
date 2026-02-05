@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
-import 'screens/login_screen.dart';
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-=======
-
 import 'screens/login_screen.dart';
 import 'screens/responsive_home.dart';
 import 'screens/widget_tree_demo.dart';
@@ -23,14 +11,13 @@ import 'screens/state_management_demo.dart';
 import 'screens/asset_demo.dart';
 import 'screens/animation_demo_screen.dart';
 import 'screens/explicit_animation_demo.dart';
+import 'screens/realtime_sync_demo_screen.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -40,11 +27,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      home: LoginScreen(),
-=======
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomeScreen(),
@@ -70,58 +54,51 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> 
+class _WelcomeScreenState extends State<WelcomeScreen>
     with TickerProviderStateMixin {
   bool clicked = false;
   int counter = 0;
   Color backgroundColor = Colors.blue;
   bool showExtraWidget = false;
   String selectedTheme = 'Light';
-  
-  late AnimationController _logoController;
-  late AnimationController _fadeController;
-  late Animation<double> _logoAnimation;
-  late Animation<double> _fadeAnimation;
+
+  late AnimationController logoController;
+  late AnimationController fadeController;
+  late Animation<double> logoAnimation;
+  late Animation<double> fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    
-    _logoController = AnimationController(
+
+    logoController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
-    _fadeController = AnimationController(
+
+    fadeController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
-    _logoAnimation = Tween<double>(
+
+    logoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: logoController, curve: Curves.elasticOut),
+    );
+
+    fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _logoController,
-      curve: Curves.elasticOut,
-    ));
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(CurvedAnimation(parent: fadeController, curve: Curves.easeInOut));
+
     // Start animations
-    _logoController.forward();
-    _fadeController.forward();
+    logoController.forward();
+    fadeController.forward();
   }
-  
+
   @override
   void dispose() {
-    _logoController.dispose();
-    _fadeController.dispose();
+    logoController.dispose();
+    fadeController.dispose();
     super.dispose();
   }
 
@@ -142,8 +119,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       backgroundColor = backgroundColor == Colors.blue
           ? Colors.green
           : backgroundColor == Colors.green
-              ? Colors.orange
-              : Colors.blue;
+          ? Colors.orange
+          : Colors.blue;
     });
   }
 
@@ -179,7 +156,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: Container(
         color: selectedTheme == 'Dark' ? Colors.grey[800] : Colors.grey[100],
         child: FadeTransition(
-          opacity: _fadeAnimation,
+          opacity: fadeAnimation,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -210,11 +187,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ),
                           const SizedBox(height: 10),
                           ScaleTransition(
-                            scale: _logoAnimation,
+                            scale: logoAnimation,
                             child: AnimatedRotation(
                               duration: const Duration(milliseconds: 800),
                               turns: clicked ? 1.0 : 0.0,
-                              child: const Icon(Icons.eco, size: 60, color: Colors.green),
+                              child: const Icon(
+                                Icons.eco,
+                                size: 60,
+                                color: Colors.green,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -262,120 +243,214 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           ),
                           const SizedBox(height: 15),
 
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithFade(const LoginScreen());
-                          },
-                          child: const Text('Login'),
-                        ),
-                      ),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithSlideFromRight(const WidgetTreeDemo());
-                          },
-                          child: const Text('Widget Tree Demo'),
-                        ),
-                      ),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithSlideFromLeft(const StatelessStatefulDemo());
-                          },
-                          child: const Text('Stateless vs Stateful'),
-                        ),
-                      ),
-
-                      PrimaryButton(
-                        label: 'Scrollable Views',
-                        onPressed: () {
-                          Navigator.of(context).pushWithSlideFromBottom(const ScrollableViews());
-                        },
-                      ),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithScaleAndFade(const UserInputForm());
-                          },
-                          child: const Text('User Input Form'),
-                        ),
-                      ),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithBouncySlide(const StateManagementDemo());
-                          },
-                          child: const Text('State Management Demo'),
-                        ),
-                      ),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushWithMixedTransition(const AssetDemo());
-                          },
-                          child: const Text('Assets Demo'),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-                      
-                      // Animation Demos Section
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.purple.shade400, Colors.pink.shade400],
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pushWithFade(const LoginScreen());
+                              },
+                              child: const Text('Login'),
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              '✨ Animation Demos ✨',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            
-                            ElevatedButton(
+
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
                               onPressed: () {
-                                Navigator.of(context).pushWithRotation(const AnimationDemoScreen());
+                                Navigator.of(context).pushWithSlideFromRight(
+                                  const WidgetTreeDemo(),
+                                );
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.purple,
-                              ),
-                              child: const Text('Implicit Animations'),
+                              child: const Text('Widget Tree Demo'),
                             ),
-                            
-                            ElevatedButton(
+                          ),
+
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
                               onPressed: () {
-                                Navigator.of(context).pushWithSizeTransition(const ExplicitAnimationDemo());
+                                Navigator.of(context).pushWithSlideFromLeft(
+                                  const StatelessStatefulDemo(),
+                                );
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.purple,
-                              ),
-                              child: const Text('Explicit Animations'),
+                              child: const Text('Stateless vs Stateful'),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+
+                          PrimaryButton(
+                            label: 'Scrollable Views',
+                            onPressed: () {
+                              Navigator.of(context).pushWithSlideFromBottom(
+                                const ScrollableViews(),
+                              );
+                            },
+                          ),
+
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pushWithScaleAndFade(const UserInputForm());
+                              },
+                              child: const Text('User Input Form'),
+                            ),
+                          ),
+
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pushWithBouncySlide(
+                                  const StateManagementDemo(),
+                                );
+                              },
+                              child: const Text('State Management Demo'),
+                            ),
+                          ),
+
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pushWithMixedTransition(const AssetDemo());
+                              },
+                              child: const Text('Assets Demo'),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Real-Time Sync Demo Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.deepPurple.shade600,
+                                  Colors.indigo.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.deepPurple.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.bolt, color: Colors.yellow),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '⚡ Real-Time Sync Demo',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Live Firestore Updates',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const RealtimeSyncDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.sync),
+                                  label: const Text('Open Real-Time Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.deepPurple,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Animation Demos Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.purple.shade400,
+                                  Colors.pink.shade400,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  '✨ Animation Demos ✨',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pushWithRotation(
+                                      const AnimationDemoScreen(),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.purple,
+                                  ),
+                                  child: const Text('Implicit Animations'),
+                                ),
+
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(
+                                      context,
+                                    ).pushWithSizeTransition(
+                                      const ExplicitAnimationDemo(),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.purple,
+                                  ),
+                                  child: const Text('Explicit Animations'),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -400,7 +475,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ),
         ),
       ),
-
     );
   }
 }

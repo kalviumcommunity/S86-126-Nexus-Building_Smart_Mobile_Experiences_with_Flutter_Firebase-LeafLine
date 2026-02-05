@@ -1,17 +1,4 @@
 import 'package:flutter/material.dart';
-
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'LOGIN SCREEN OK',
-          style: TextStyle(fontSize: 22),
-=======
 import '../services/auth_service.dart';
 import 'signup_screen.dart';
 import 'dashboard_screen.dart';

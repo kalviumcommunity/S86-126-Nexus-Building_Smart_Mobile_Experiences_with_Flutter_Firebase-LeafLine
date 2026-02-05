@@ -239,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       child: Column(
                         children: [
                           Icon(

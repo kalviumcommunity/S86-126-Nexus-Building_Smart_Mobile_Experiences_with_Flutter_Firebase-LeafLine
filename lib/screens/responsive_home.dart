@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-=======
 import 'login_screen.dart';
 
 class ResponsiveHome extends StatelessWidget {
@@ -8,24 +6,18 @@ class ResponsiveHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isTablet = screenWidth > 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Responsive UI'),
-      ),
+      appBar: AppBar(title: const Text('Responsive UI')),
       body: Padding(
         padding: EdgeInsets.all(isTablet ? 24 : 16),
         child: isTablet ? _tabletLayout() : _mobileLayout(),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(12),
-        child: ElevatedButton(
-          onPressed: () {},
-          child: const Text('Continue'),
-        ),
+        child: ElevatedButton(onPressed: () {}, child: const Text('Continue')),
       ),
     );
   }
@@ -72,19 +64,6 @@ class ResponsiveHome extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-        ),
-=======
-    return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // EXPLICIT breakpoint for assignment clarity
-            if (constraints.maxWidth < 600) {
-              return _buildResponsiveLayout(context, constraints, false);
-            } else {
-              return _buildResponsiveLayout(context, constraints, true);
-            }
-          },
         ),
       ),
     );
@@ -152,11 +131,7 @@ class ResponsiveHome extends StatelessWidget {
               ),
             ],
           ),
-          Icon(
-            Icons.eco,
-            size: isTablet ? 40 : 32,
-            color: Colors.white,
-          ),
+          Icon(Icons.eco, size: isTablet ? 40 : 32, color: Colors.white),
         ],
       ),
     );
@@ -238,10 +213,7 @@ class ResponsiveHome extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 8,
-            ),
+            BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 8),
           ],
         ),
         child: Column(
@@ -317,7 +289,6 @@ class ResponsiveHome extends StatelessWidget {
         backgroundColor: color,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 14),
-
       ),
     );
   }
