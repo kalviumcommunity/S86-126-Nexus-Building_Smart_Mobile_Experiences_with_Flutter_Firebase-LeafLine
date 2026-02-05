@@ -13,6 +13,7 @@ import 'screens/animation_demo_screen.dart';
 import 'screens/explicit_animation_demo.dart';
 import 'screens/realtime_sync_demo_screen.dart';
 import 'screens/query_filter_demo_screen.dart';
+import 'screens/storage_upload_screen.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
 
@@ -460,6 +461,80 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.teal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Firebase Storage Upload Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.deepOrange.shade600,
+                                  Colors.orange.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.deepOrange.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.cloud_upload,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '📤 Storage Upload Demo',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Firebase Storage with Image Picker',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const StorageUploadScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.upload_file),
+                                  label: const Text('Open Upload Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.deepOrange,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,
