@@ -1,4 +1,5 @@
-23erfcimport 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
@@ -15,12 +16,19 @@ import 'screens/realtime_sync_demo_screen.dart';
 import 'screens/query_filter_demo_screen.dart';
 import 'screens/storage_upload_screen.dart';
 import 'screens/cloud_functions_demo_screen.dart';
+import 'screens/push_notifications_demo_screen.dart';
+import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Push Notifications (skip on web)
+  if (!kIsWeb) {
+    await NotificationService().initialize();
+  }
 
   runApp(const MyApp());
 }
@@ -46,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/animations': (context) => const AnimationDemoScreen(),
         '/explicitAnimations': (context) => const ExplicitAnimationDemo(),
         '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
+        '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
       },
     );
   }
@@ -611,6 +620,80 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.green,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Push Notifications Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.deepPurple.shade600,
+                                  Colors.purple.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.deepPurple.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.notifications_active,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '🔔 Push Notifications',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Firebase Cloud Messaging (FCM)',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const PushNotificationsDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.send),
+                                  label: const Text('Open Notifications'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.deepPurple,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,

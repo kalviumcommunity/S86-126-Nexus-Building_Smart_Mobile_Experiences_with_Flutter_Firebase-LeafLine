@@ -37,7 +37,16 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **Real-Time Logging**: Firebase Console integration
 - **Zero Server Management**: Scalable serverless architecture
 
-### 5. Firebase Authentication
+### 5. Push Notifications (Firebase Cloud Messaging) 🔔
+- **FCM Integration**: Firebase Cloud Messaging for push notifications
+- **Multi-State Handling**: Foreground, background, and terminated state notifications
+- **Device Token Management**: Unique token for each device
+- **Topic Subscription**: Subscribe/unsubscribe to notification topics
+- **Local Notifications**: Display notifications with flutter_local_notifications
+- **Real-Time Message Display**: Live notification feed in app
+- **Permission Handling**: Request and manage notification permissions
+
+### 6. Firebase Authentication
 - User registration and login
 - Secure authentication flow
 - Session management
@@ -1868,6 +1877,496 @@ These patterns scale to production:
 - [Callable Functions Guide](https://firebase.google.com/docs/functions/callable)
 - [Firestore Triggers](https://firebase.google.com/docs/functions/firestore-events)
 - [Flutter cloud_functions Package](https://pub.dev/packages/cloud_functions)
+
+---
+
+#### Task 5: Firebase Cloud Messaging (Push Notifications) 🔔
+
+**Implementation:** Complete
+- Firebase Cloud Messaging (FCM) integration
+- NotificationService for handling all FCM operations
+- Multi-state notification handling (foreground, background, terminated)
+- Device token management and topic subscriptions
+- Interactive demo screen with real-time notification feed
+- Local notifications with flutter_local_notifications
+
+**Commit message:**
+```
+feat: implemented Firebase Cloud Messaging with push notifications
+```
+
+**Pull request title:**
+```
+[Sprint-2] Firebase Cloud Messaging Implementation – [Your Team Name]
+```
+
+**PR Description:**
+
+## 🔔 Firebase Cloud Messaging Implementation
+
+### ✨ Features Implemented
+- ✅ **FCM Integration**: Complete Firebase Cloud Messaging setup
+- ✅ **Multi-State Handling**: Foreground, background, and terminated state notifications
+- ✅ **Device Token**: Get and display unique FCM device token
+- ✅ **Topic Subscription**: Subscribe/unsubscribe to notification topics
+- ✅ **Local Notifications**: Display notifications using flutter_local_notifications
+- ✅ **Real-Time Feed**: Live notification display in app
+- ✅ **Permission Management**: Request and handle notification permissions
+
+### 🔥 Technical Implementation
+
+#### **NotificationService (services/notification_service.dart)**
+
+**Core Features:**
+```dart
+class NotificationService {
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications = 
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> initialize() async {
+    // Request permissions
+    final settings = await _requestPermission();
+    
+    // Initialize local notifications
+    await _initializeLocalNotifications();
+    
+    // Get device token
+    _deviceToken = await _getDeviceToken();
+    
+    // Setup message handlers
+    _setupForegroundMessageHandler();
+    _setupBackgroundMessageHandler();
+    _setupTerminatedMessageHandler();
+  }
+}
+```
+
+#### **1. Requesting Permissions**
+```dart
+Future<NotificationSettings> _requestPermission() async {
+  return await _messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+}
+```
+
+**Result:**
+- ✅ Alert permission
+- ✅ Badge permission
+- ✅ Sound permission
+- ❌ Critical alerts (not requested)
+
+#### **2. Foreground Notifications**
+Handle notifications when app is in foreground:
+
+```dart
+void _setupForegroundMessageHandler() {
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('🔔 Foreground message received');
+    print('Title: ${message.notification?.title}');
+    print('Body: ${message.notification?.body}');
+    
+    // Show local notification
+    _showLocalNotification(message);
+    
+    // Add to stream for UI updates
+    _messageStreamController.add(message);
+  });
+}
+```
+
+**Behavior:**
+- Receives message immediately
+- Displays local notification banner
+- Updates UI notification feed
+- Logs to console for debugging
+
+#### **3. Background Notifications**
+Handle notifications when app is in background (not terminated):
+
+```dart
+void _setupBackgroundMessageHandler() {
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('🔔 App opened from background notification');
+    print('Title: ${message.notification?.title}');
+    print('Data: ${message.data}');
+    
+    // Add to UI feed
+    _messageStreamController.add(message);
+  });
+}
+```
+
+**Behavior:**
+- User taps notification
+- App opens/resumes
+- Message added to feed
+- Can navigate to specific screen
+
+#### **4. Terminated State Notifications**
+Handle notifications when app was completely closed:
+
+```dart
+Future<void> _setupTerminatedMessageHandler() async {
+  RemoteMessage? initialMessage = 
+      await FirebaseMessaging.instance.getInitialMessage();
+  
+  if (initialMessage != null) {
+    print('🔔 App opened from terminated state');
+    print('Title: ${initialMessage.notification?.title}');
+    
+    // Process initial message
+    _messageStreamController.add(initialMessage);
+  }
+}
+```
+
+**Behavior:**
+- App was completely closed
+- User taps notification
+- App launches
+- Initial message retrieved and processed
+
+#### **5. Background Handler (Top-Level Function)**
+Required for handling messages when app is in background:
+
+```dart
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("🔔 Background Message: ${message.notification?.title}");
+}
+
+// Register in main()
+FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+```
+
+**Note:** Must be a top-level function, not a class method.
+
+#### **6. Getting Device Token**
+Each device has a unique FCM token:
+
+```dart
+Future<String?> _getDeviceToken() async {
+  try {
+    return await _messaging.getToken();
+  } catch (e) {
+    print('❌ Error getting device token: $e');
+    return null;
+  }
+}
+```
+
+**Token Example:**
+```
+dXyzABC123...longTokenString...xyz789
+```
+
+**Uses:**
+- Send notifications to specific device
+- Save to database for user-specific notifications
+- Test notifications from Firebase Console
+
+#### **7. Topic Subscriptions**
+Subscribe multiple devices to topics for targeted notifications:
+
+```dart
+Future<void> subscribeToTopic(String topic) async {
+  await _messaging.subscribeToTopic(topic);
+  print('✅ Subscribed to topic: $topic');
+}
+
+Future<void> unsubscribeFromTopic(String topic) async {
+  await _messaging.unsubscribeFromTopic(topic);
+  print('✅ Unsubscribed from topic: $topic');
+}
+```
+
+**Use Cases:**
+- `news` - News updates for all users
+- `plants` - Plant care reminders
+- `updates` - App update notifications
+- `user_123` - User-specific channel
+
+#### **8. Local Notifications**
+Display beautiful notifications using flutter_local_notifications:
+
+```dart
+Future<void> _showLocalNotification(RemoteMessage message) async {
+  await _localNotifications.show(
+    message.notification.hashCode,
+    message.notification?.title,
+    message.notification?.body,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'high_importance_channel',
+        'High Importance Notifications',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+        playSound: true,
+        enableVibration: true,
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    ),
+  );
+}
+```
+
+**Features:**
+- Custom notification channel
+- High importance (shows as heads-up)
+- Sound and vibration
+- Custom icon
+- Platform-specific configuration
+
+### 📱 Flutter UI Implementation
+
+**Screen:** `lib/screens/push_notifications_demo_screen.dart`
+
+**Features:**
+1. **Device Token Display**
+   - Shows FCM token in monospace font
+   - Copy button to clipboard
+   - Formatted for easy reading
+
+2. **Topic Subscription**
+   - Text input for topic name
+   - Subscribe/Unsubscribe buttons
+   - Visual feedback on actions
+
+3. **Notification Feed**
+   - Real-time stream of received notifications
+   - Displays title, body, timestamp
+   - Shows data payload if present
+   - Relative time formatting (e.g., "2m ago")
+
+4. **Instructions Card**
+   - Step-by-step testing guide
+   - Firebase Console navigation
+   - Clear visual styling
+
+**Key Code:**
+```dart
+class PushNotificationsDemoScreen extends StatefulWidget {
+  // Manages notification display and interactions
+}
+
+@override
+void initState() {
+  super.initState();
+  _initializeNotifications();
+  
+  // Listen to incoming messages
+  _notificationService.onMessage.listen((RemoteMessage message) {
+    setState(() {
+      _messages.insert(0, message);
+    });
+  });
+}
+```
+
+### 🎯 Notification States Comparison
+
+| State | App Status | Notification Display | Tap Behavior | Use Case |
+|-------|-----------|---------------------|--------------|----------|
+| **Foreground** | App open & active | Local notification banner | Adds to feed | Real-time alerts |
+| **Background** | App open but not visible | System notification | Opens app, adds to feed | User engagement |
+| **Terminated** | App completely closed | System notification | Launches app with message | Critical alerts |
+
+### 💡 Why Push Notifications Are Important
+
+**User Engagement:**
+- 📈 **7x higher engagement** for apps with push notifications enabled
+- 🔄 **88% retention improvement** in first 90 days
+- ⚡ **Instant communication** even when app is closed
+
+**Business Value:**
+- 💰 **4x higher conversion rates** for time-sensitive offers
+- 🎯 **Personalized targeting** with topics and user segments
+- 📊 **Measurable impact** with delivery and open rates
+
+**Technical Benefits:**
+- 🌐 **Cross-platform** (Android, iOS, Web)
+- 🔋 **Battery efficient** (uses system services)
+- 📡 **Reliable delivery** (Google/Apple infrastructure)
+- 🔐 **Secure** (encrypted communication)
+
+### 🎯 Real-World Use Cases
+
+**Implemented in LeafLine:**
+- 🌱 **Plant Care Reminders**: "Time to water your Monstera!"
+- 📰 **News Updates**: Subscribe to plant care tips topic
+- 👤 **User-Specific**: Personal notifications for each user
+- 🎉 **Event Notifications**: New features, updates
+
+**Production Applications:**
+- 💬 **Chat Apps**: New message alerts (WhatsApp, Slack)
+- 🛒 **E-Commerce**: Order updates, delivery tracking (Amazon, Shopify)
+- 📱 **Social Media**: Likes, comments, mentions (Instagram, Twitter)
+- 🏥 **Healthcare**: Appointment reminders, medication alerts
+- 📧 **Email**: New email notifications (Gmail, Outlook)
+- 🎮 **Gaming**: Daily rewards, event notifications
+- 🚗 **Transportation**: Ride updates (Uber, Lyft)
+- 📦 **Delivery**: Package tracking (FedEx, DHL)
+
+### 🛡️ Permission Handling
+
+**iOS (Info.plist):**
+```xml
+<key>NSUserNotificationsUsageDescription</key>
+<string>We need permission to send you important notifications</string>
+```
+
+**Android (AndroidManifest.xml):**
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<uses-permission android:name="android.permission.VIBRATE"/>
+```
+
+**Android 13+ (API 33+):**
+Requires runtime permission request (handled by firebase_messaging)
+
+### 📊 Testing Guide
+
+#### **Method 1: Firebase Console (Recommended)**
+
+1. **Get Device Token:**
+   - Run app
+   - Navigate to Push Notifications screen
+   - Copy device token
+
+2. **Send Test Notification:**
+   - Open Firebase Console → Messaging
+   - Click "Send your first message"
+   - Enter title: "Test Notification"
+   - Enter message: "This is a test from Firebase!"
+   - Click "Send test message"
+   - Paste your device token
+   - Click "Test"
+
+3. **Verify:**
+   - Notification appears
+   - Check app notification feed
+   - Verify console logs
+
+#### **Method 2: Topic Notifications**
+
+1. **Subscribe to Topic:**
+   - In app, enter topic name (e.g., "plants")
+   - Click "Subscribe"
+
+2. **Send to Topic:**
+   - Firebase Console → Messaging
+   - Create new campaign
+   - Select topic: "plants"
+   - Send notification
+
+3. **All subscribed devices receive it!**
+
+#### **Method 3: Programmatic (Using Cloud Functions)**
+
+```javascript
+const admin = require('firebase-admin');
+
+exports.sendWelcomeNotification = functions.firestore
+  .document('users/{userId}')
+  .onCreate(async (snap, context) => {
+    const token = snap.data().fcmToken;
+    
+    const message = {
+      notification: {
+        title: 'Welcome to LeafLine!',
+        body: 'Start adding your plants today.',
+      },
+      token: token,
+    };
+    
+    await admin.messaging().send(message);
+  });
+```
+
+### 🐛 Common Issues & Solutions
+
+**Issue 1: No Notifications Received**
+- ✅ Check internet connection
+- ✅ Verify Firebase project configuration
+- ✅ Ensure google-services.json (Android) / GoogleService-Info.plist (iOS) is added
+- ✅ Confirm FCM is enabled in Firebase Console
+- ✅ Check device token is valid
+
+**Issue 2: Foreground Notifications Not Showing**
+- ✅ Verify local notifications initialized
+- ✅ Check notification channel created (Android)
+- ✅ Confirm permissions granted
+
+**Issue 3: Background Handler Not Working**
+- ✅ Must be top-level function (not class method)
+- ✅ Add @pragma('vm:entry-point') annotation
+- ✅ Register with FirebaseMessaging.onBackgroundMessage()
+
+**Issue 4: iOS Not Receiving Notifications**
+- ✅ Configure APNs in Firebase Console
+- ✅ Add capabilities in Xcode (Push Notifications, Background Modes)
+- ✅ Test on real device (simulator doesn't support push)
+
+**Issue 5: Permission Denied**
+- ✅ Check Info.plist has usage description (iOS)
+- ✅ Verify AndroidManifest.xml has POST_NOTIFICATIONS permission
+- ✅ Request permission before sending notifications
+
+### 📁 Files Created/Modified
+
+**New Files:**
+- `lib/services/notification_service.dart` - Complete FCM service (300+ lines)
+- `lib/screens/push_notifications_demo_screen.dart` - Interactive UI (450+ lines)
+
+**Modified Files:**
+- `pubspec.yaml` - Added firebase_messaging: ^15.0.0, flutter_local_notifications: ^17.0.0
+- `lib/main.dart` - Initialize NotificationService, added route and navigation
+- `README.md` - Comprehensive Push Notifications documentation
+
+### 🎓 Learning Outcomes
+
+**Why Push Notifications Matter:**
+
+Push notifications transform passive apps into active communication channels. Unlike emails (20% open rate) or in-app messages (users must open app), push notifications achieve 50-90% visibility rates and enable real-time engagement.
+
+For LeafLine:
+- **User Retention**: Remind users to water plants → higher engagement
+- **Real-Time Updates**: Instant alerts for plant care tips
+- **Personalization**: Targeted notifications based on user's plants
+- **Re-engagement**: Bring back inactive users with timely reminders
+
+**Technical Architecture:**
+
+FCM uses a pub-sub model where each device registers for a unique token. Firebase routes messages efficiently using Google's infrastructure, handling delivery, retries, and platform-specific formatting automatically.
+
+**Three Notification States:**
+
+1. **Foreground**: App is active. We show local notification + update UI
+2. **Background**: App is in background. System shows notification, we handle tap
+3. **Terminated**: App is closed. System shows notification, we handle app launch
+
+**Key Insight:** Push notifications are essential for modern apps. They drive engagement, enable real-time communication, and work reliably across platforms without managing complex server infrastructure.
+
+### 📚 Resources
+
+- [Firebase Cloud Messaging Docs](https://firebase.google.com/docs/cloud-messaging)
+- [FlutterFire Messaging](https://firebase.flutter.dev/docs/messaging/overview/)
+- [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
+- [Android 13 Notification Changes](https://developer.android.com/develop/ui/views/notifications/notification-permission)
+- [iOS Push Notification Guide](https://firebase.google.com/docs/cloud-messaging/ios/client)
 
 ---
 
