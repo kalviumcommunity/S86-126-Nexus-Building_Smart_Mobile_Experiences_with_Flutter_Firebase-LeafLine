@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+23erfcimport 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
@@ -14,6 +14,7 @@ import 'screens/explicit_animation_demo.dart';
 import 'screens/realtime_sync_demo_screen.dart';
 import 'screens/query_filter_demo_screen.dart';
 import 'screens/storage_upload_screen.dart';
+import 'screens/cloud_functions_demo_screen.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
 
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/assets': (context) => const AssetDemo(),
         '/animations': (context) => const AnimationDemoScreen(),
         '/explicitAnimations': (context) => const ExplicitAnimationDemo(),
+        '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
       },
     );
   }
@@ -535,6 +537,80 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.deepOrange,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Cloud Functions Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.green.shade600,
+                                  Colors.lightGreen.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.cloud,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '☁️ Cloud Functions Demo',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Serverless Backend Functions',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const CloudFunctionsDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.functions),
+                                  label: const Text('Open Functions Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.green,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,

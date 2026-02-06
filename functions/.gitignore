@@ -1,0 +1,18 @@
+# Compiled JavaScript files
+**/*.js
+**/*.js.map
+
+# TypeScript declaration files
+typings/
+
+# Node.js dependencies
+node_modules/
+
+# Firebase cache
+.firebase/
+
+# Firebase config
+.runtimeconfig.json
+
+# Keep index.js
+!index.js
