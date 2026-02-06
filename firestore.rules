@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // SECURE FIRESTORE RULES
+    // ============================================
+    // These rules ensure only authenticated users
+    // can access their own data
+    // ============================================
+    
+    // Users collection - user can only access their own document
+    match /users/{uid} {
+      // Allow read/write only if authenticated AND uid matches
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      
+      // Subcollection: user_plants
+      match /user_plants/{plantId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        
+        // Nested subcollection: care_logs
+        match /care_logs/{logId} {
+          allow read, write: if request.auth != null && request.auth.uid == uid;
+        }
+      }
+      
+      // Subcollection: plant_notes
+      match /plant_notes/{noteId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+      
+      // Subcollection: reminders
+      match /reminders/{reminderId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+    
+    // Plants collection - read-only for all authenticated users
+    // (shared plant database)
+    match /plants/{plantId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only admins can write (disable for now)
+      
+      match /care_schedules/{scheduleId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+    
+    // Plant notes - user can only access their own notes
+    match /plant_notes/{noteId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Reminders - user can only access their own reminders
+    match /reminders/{reminderId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.userId;
+    }
+    
+    // ============================================
+    // DENY ALL OTHER ACCESS
+    // ============================================
+    // Any path not explicitly allowed above is denied
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

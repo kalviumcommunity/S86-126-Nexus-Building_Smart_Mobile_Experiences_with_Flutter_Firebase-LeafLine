@@ -46,7 +46,15 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **Real-Time Message Display**: Live notification feed in app
 - **Permission Handling**: Request and manage notification permissions
 
-### 6. Firebase Authentication
+### 6. Firestore Security Rules 🔐
+- **Authentication-Protected Database**: Firestore secured with Firebase Auth
+- **User Data Isolation**: Each user can only access their own data
+- **UID-Based Rules**: Security rules validate `request.auth.uid`
+- **Permission Testing**: Interactive demo showing authorized vs unauthorized access
+- **Secure Collections**: Users, plants, notes with granular permissions
+- **Deployment Guide**: Firebase Console and CLI deployment instructions
+
+### 7. Firebase Authentication
 - User registration and login
 - Secure authentication flow
 - Session management
@@ -2367,6 +2375,657 @@ FCM uses a pub-sub model where each device registers for a unique token. Firebas
 - [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
 - [Android 13 Notification Changes](https://developer.android.com/develop/ui/views/notifications/notification-permission)
 - [iOS Push Notification Guide](https://firebase.google.com/docs/cloud-messaging/ios/client)
+
+---
+
+#### Task 6: Firestore Security Rules 🔐
+
+**Implementation:** Complete
+- Secure Firestore rules file created
+- Authentication-protected database access
+- User data isolation with UID validation
+- Interactive security testing demo screen
+- Deployment instructions for Firebase Console and CLI
+
+**Commit message:**
+```
+feat: implemented Firestore Security Rules with authentication protection
+```
+
+**Pull request title:**
+```
+[Sprint-2] Firestore Security Implementation – [Your Team Name]
+```
+
+**PR Description:**
+
+## 🔐 Firestore Security Rules Implementation
+
+### ✨ Features Implemented
+- ✅ **Secure Rules File**: Complete `firestore.rules` with authentication checks
+- ✅ **User Data Isolation**: Each user can only access their own data
+- ✅ **UID Validation**: Rules verify `request.auth.uid == uid`
+- ✅ **Interactive Demo**: Screen showing authorized vs unauthorized access
+- ✅ **Permission Testing**: Test security rules in real-time
+- ✅ **Deployment Guide**: Firebase Console and CLI instructions
+
+### 🔥 Technical Implementation
+
+#### **firestore.rules**
+
+**Complete Security Rules:**
+```javascript
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - user can only access their own document
+    match /users/{uid} {
+      // Allow read/write only if authenticated AND uid matches
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      
+      // Subcollection: user_plants
+      match /user_plants/{plantId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        
+        // Nested subcollection: care_logs
+        match /care_logs/{logId} {
+          allow read, write: if request.auth != null && request.auth.uid == uid;
+        }
+      }
+      
+      // Subcollection: plant_notes
+      match /plant_notes/{noteId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+    
+    // Plants collection - read-only for all authenticated users
+    match /plants/{plantId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only admins can write
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+**Key Security Principles:**
+
+1. **Authentication Required**: `request.auth != null`
+   - All database access requires user to be signed in
+   - Blocks anonymous reads/writes
+
+2. **UID Validation**: `request.auth.uid == uid`
+   - Users can only access documents matching their UID
+   - Prevents cross-account data access
+
+3. **Path-Specific Rules**: `/users/{uid}`
+   - Each collection has custom security logic
+   - Subcollections inherit parent permissions
+
+4. **Deny by Default**: `allow read, write: if false`
+   - Any unmatched path is blocked
+   - Secure by default approach
+
+#### **1. Why Security Rules Matter**
+
+**Without Security Rules:**
+```javascript
+// ❌ UNSAFE - Test Mode (Default)
+match /{document=**} {
+  allow read, write: if true;  // Anyone can access anything!
+}
+```
+
+**Problems:**
+- ❌ Anyone can read all user data
+- ❌ Malicious users can delete everything
+- ❌ Data privacy violations
+- ❌ No access control
+- ❌ Regulatory compliance issues (GDPR, CCPA)
+
+**With Security Rules:**
+```javascript
+// ✅ SECURE - Production Mode
+match /users/{uid} {
+  allow read, write: if request.auth.uid == uid;
+}
+```
+
+**Benefits:**
+- ✅ User data isolation
+- ✅ Authentication required
+- ✅ Prevents unauthorized access
+- ✅ Compliant with privacy regulations
+- ✅ Audit trail with Firebase logs
+
+#### **2. Rule Structure Explained**
+
+**Basic Rule Anatomy:**
+```javascript
+match /collection/{documentId} {
+  allow read: if <condition>;
+  allow write: if <condition>;
+}
+```
+
+**Available Operations:**
+- `read`: Includes `get` and `list`
+- `write`: Includes `create`, `update`, `delete`
+- Can be granular: `allow get, list, create, update, delete`
+
+**Request Object:**
+```javascript
+request.auth         // Authentication info
+request.auth.uid     // User's unique ID
+request.auth.token   // Firebase Auth token
+request.resource     // New document data (for writes)
+resource             // Existing document data (for reads/updates)
+```
+
+#### **3. User Collection Security**
+
+**Rule:**
+```javascript
+match /users/{uid} {
+  allow read, write: if request.auth != null && request.auth.uid == uid;
+}
+```
+
+**What it does:**
+- User `abc123` can read/write `/users/abc123`
+- User `abc123` **CANNOT** read/write `/users/xyz789`
+- Unauthenticated users **CANNOT** access anything
+
+**Flutter Usage:**
+```dart
+final uid = FirebaseAuth.instance.currentUser!.uid;
+
+// ✅ ALLOWED - Reading own document
+await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+// ❌ DENIED - Reading someone else's document
+await FirebaseFirestore.instance.collection('users').doc('other-uid').get();
+// Throws: [cloud_firestore/permission-denied]
+```
+
+#### **4. Subcollection Security**
+
+**Nested Rules:**
+```javascript
+match /users/{uid} {
+  allow read, write: if request.auth.uid == uid;
+  
+  match /user_plants/{plantId} {
+    allow read, write: if request.auth.uid == uid;
+  }
+}
+```
+
+**Path Example:**
+- `/users/abc123/user_plants/plant_001` ✅ User abc123 can access
+- `/users/xyz789/user_plants/plant_001` ❌ User abc123 **cannot** access
+
+**Flutter Usage:**
+```dart
+final uid = FirebaseAuth.instance.currentUser!.uid;
+
+// ✅ Add plant to own collection
+await FirebaseFirestore.instance
+    .collection('users')
+    .doc(uid)
+    .collection('user_plants')
+    .add({'name': 'Monstera'});
+```
+
+#### **5. Shared Collections (Read-Only)**
+
+**Plant Database Rule:**
+```javascript
+match /plants/{plantId} {
+  allow read: if request.auth != null;
+  allow write: if false;
+}
+```
+
+**Behavior:**
+- All authenticated users can **read** plant database
+- **Nobody** can write (admin-only via Cloud Functions)
+- Prevents user tampering with shared data
+
+**Use Cases:**
+- Product catalogs
+- Reference data
+- Public content
+- Shared resources
+
+#### **6. Field-Level Validation**
+
+**Advanced Rules with Data Validation:**
+```javascript
+match /users/{uid} {
+  allow create: if request.auth.uid == uid &&
+                  request.resource.data.email is string &&
+                  request.resource.data.email.size() > 0;
+  
+  allow update: if request.auth.uid == uid &&
+                  request.resource.data.email == resource.data.email; // Email can't change
+}
+```
+
+**Validation Examples:**
+- Check required fields
+- Enforce data types
+- Validate field values
+- Prevent field modification
+
+### 📱 Flutter Demo Screen
+
+**Screen:** `lib/screens/firestore_security_demo_screen.dart`
+
+**Features:**
+
+1. **Authentication Section**
+   - Sign in / Sign up functionality
+   - Display current user info (email, UID)
+   - Sign out button
+
+2. **Authorized Operations**
+   - Read own user data
+   - Write to own user document
+   - Real-time data display
+   - Success/error feedback
+
+3. **Security Testing**
+   - "Test Unauthorized Access" button
+   - Attempts to read another user's data
+   - Demonstrates PERMISSION_DENIED error
+   - Proves security rules work
+
+4. **Visual Feedback**
+   - Green cards for successful operations
+   - Red cards for denied operations
+   - Status messages with explanations
+   - Loading indicators
+
+**Key Code Snippets:**
+
+**Read Own Data (Allowed):**
+```dart
+Future<void> _loadUserData() async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+    
+    setState(() {
+      _userData = doc.data();
+      _statusMessage = '✅ Data loaded successfully';
+    });
+  } on FirebaseException catch (e) {
+    _setStatus('❌ PERMISSION DENIED: ${e.message}', isError: true);
+  }
+}
+```
+
+**Write Own Data (Allowed):**
+```dart
+Future<void> _writeUserData() async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  await FirebaseFirestore.instance.collection('users').doc(uid).set({
+    'email': FirebaseAuth.instance.currentUser!.email,
+    'testData': 'Updated at ${DateTime.now()}',
+  });
+}
+```
+
+**Test Unauthorized Access (Denied):**
+```dart
+Future<void> _testUnauthorizedAccess() async {
+  try {
+    // Try to read someone else's document
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc('different-user-uid-12345')
+        .get();
+    
+    // If we reach here, rules aren't deployed
+    _setStatus('⚠️ Security rules not deployed!', isError: true);
+  } on FirebaseException catch (e) {
+    // This is EXPECTED - security is working!
+    _setStatus('✅ SECURITY WORKING! Error: ${e.code}', isError: false);
+  }
+}
+```
+
+### 🚀 Deploying Security Rules
+
+#### **Method 1: Firebase Console (Recommended for Beginners)**
+
+**Steps:**
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Navigate to **Firestore Database** → **Rules**
+4. Copy entire content from `firestore.rules` file
+5. Paste into Firebase Console editor
+6. Click **"Publish"**
+7. Rules are now active (takes ~1 minute to propagate)
+
+**Visual Confirmation:**
+- Green "Rules are published" message
+- Rules tab shows deployment timestamp
+- Test in demo screen - unauthorized access should fail
+
+#### **Method 2: Firebase CLI (Recommended for Production)**
+
+**Prerequisites:**
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Initialize project (if not done)
+firebase init firestore
+```
+
+**Deploy Rules:**
+```bash
+# Deploy only Firestore rules
+firebase deploy --only firestore:rules
+
+# Output:
+# ✔ Deploy complete!
+# Firestore Rules: Published
+```
+
+**Verify Deployment:**
+```bash
+# Check deployment history
+firebase firestore:rules get
+```
+
+#### **Method 3: Continuous Deployment (GitHub Actions)**
+
+**`.github/workflows/deploy-rules.yml`:**
+```yaml
+name: Deploy Firestore Rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'firestore.rules'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only firestore:rules
+        env:
+          FIREBASE_TOKEN: \${{ secrets.FIREBASE_TOKEN }}
+```
+
+### 📊 Testing Security Rules
+
+#### **1. Firebase Console Rules Playground**
+
+**Access:**
+- Firebase Console → Firestore → Rules → **Rules Playground**
+
+**Test Scenarios:**
+
+**Authenticated Read (Own Data):**
+```
+Location: /users/abc123
+Type: get
+Auth: Authenticated as abc123
+
+Result: ✅ Allow
+```
+
+**Authenticated Read (Other's Data):**
+```
+Location: /users/xyz789
+Type: get
+Auth: Authenticated as abc123
+
+Result: ❌ Deny (permission-denied)
+```
+
+**Unauthenticated Access:**
+```
+Location: /users/abc123
+Type: get
+Auth: Unauthenticated
+
+Result: ❌ Deny (permission-denied)
+```
+
+#### **2. In-App Testing (Demo Screen)**
+
+**Steps:**
+1. Run Flutter app
+2. Navigate to "Firestore Security Demo"
+3. Sign up / Sign in with test account
+4. Click **"Read My Data"** → Should succeed ✅
+5. Click **"Write My Data"** → Should succeed ✅
+6. Click **"Test Unauthorized Access"** → Should fail ❌
+7. Verify error message shows `PERMISSION_DENIED`
+
+**Expected Results:**
+- Own data operations: Success
+- Other user's data: `[cloud_firestore/permission-denied]`
+- Unauthenticated: `[cloud_firestore/permission-denied]`
+
+#### **3. Unit Testing Rules (Advanced)**
+
+**Install Rules Testing:**
+```bash
+npm install --save-dev @firebase/rules-unit-testing
+```
+
+**Test File (`test/firestore.rules.test.js`):**
+```javascript
+const { assertSucceeds, assertFails } = require('@firebase/rules-unit-testing');
+
+test('Users can read their own data', async () => {
+  const db = testEnv.authenticatedContext('user123').firestore();
+  await assertSucceeds(db.collection('users').doc('user123').get());
+});
+
+test('Users cannot read other users data', async () => {
+  const db = testEnv.authenticatedContext('user123').firestore();
+  await assertFails(db.collection('users').doc('user456').get());
+});
+```
+
+### 🐛 Common Issues & Solutions
+
+**Issue 1: PERMISSION_DENIED on Own Data**
+- **Cause**: Rules not deployed or UID mismatch
+- **Fix**: 
+  - Verify rules deployed in Firebase Console
+  - Check `FirebaseAuth.instance.currentUser.uid` matches document path
+  - Sign out and sign in again
+
+**Issue 2: Rules Not Taking Effect**
+- **Cause**: Propagation delay or cache
+- **Fix**:
+  - Wait 1-2 minutes after deployment
+  - Clear browser cache
+  - Restart Flutter app
+
+**Issue 3: Can Access Other User's Data**
+- **Cause**: Rules still in test mode
+- **Fix**:
+  - Check Firestore Console → Rules
+  - Should NOT have `allow read, write: if true;`
+  - Redeploy secure rules
+
+**Issue 4: Firebase CLI Deployment Fails**
+- **Cause**: Authentication or project mismatch
+- **Fix**:
+  ```bash
+  firebase logout
+  firebase login
+  firebase use --add  # Select correct project
+  firebase deploy --only firestore:rules
+  ```
+
+**Issue 5: Subcollections Not Protected**
+- **Cause**: Missing subcollection rules
+- **Fix**: Add explicit rules for each subcollection level
+  ```javascript
+  match /users/{uid}/user_plants/{plantId} {
+    allow read, write: if request.auth.uid == uid;
+  }
+  ```
+
+### 🎯 Security Best Practices
+
+#### **1. Never Use Test Mode in Production**
+```javascript
+// ❌ NEVER IN PRODUCTION
+match /{document=**} {
+  allow read, write: if true;
+}
+```
+
+#### **2. Validate Data Types**
+```javascript
+allow create: if request.resource.data.email is string &&
+                request.resource.data.age is int &&
+                request.resource.data.age >= 0;
+```
+
+#### **3. Use Functions for Complex Logic**
+```javascript
+function isOwner(uid) {
+  return request.auth.uid == uid;
+}
+
+match /users/{uid} {
+  allow read, write: if isOwner(uid);
+}
+```
+
+#### **4. Limit Query Scope**
+```javascript
+// Prevent listing all users
+match /users/{uid} {
+  allow get: if request.auth.uid == uid;  // Single doc only
+  allow list: if false;  // No listing
+}
+```
+
+#### **5. Rate Limiting (Advanced)**
+```javascript
+allow create: if request.time < timestamp.date(2024, 12, 31) &&
+                request.time > resource.data.lastUpdate + duration.value(1, 'h');
+```
+
+### 💡 Real-World Use Cases
+
+**1. Social Media App:**
+```javascript
+match /posts/{postId} {
+  allow read: if request.auth != null;
+  allow create: if request.auth.uid == request.resource.data.authorId;
+  allow update, delete: if request.auth.uid == resource.data.authorId;
+}
+```
+
+**2. E-Commerce:**
+```javascript
+match /orders/{orderId} {
+  allow read: if request.auth.uid == resource.data.userId;
+  allow create: if request.auth.uid == request.resource.data.userId &&
+                  request.resource.data.total > 0;
+  allow update: if false;  // Orders can't be modified
+}
+```
+
+**3. Collaborative Documents:**
+```javascript
+match /documents/{docId} {
+  allow read: if request.auth.uid in resource.data.collaborators;
+  allow write: if request.auth.uid == resource.data.owner;
+}
+```
+
+**4. Admin-Only Content:**
+```javascript
+match /admin/{document} {
+  allow read, write: if request.auth.token.admin == true;
+}
+```
+
+### 📁 Files Created/Modified
+
+**New Files:**
+- `firestore.rules` - Complete security rules (70+ lines)
+- `lib/screens/firestore_security_demo_screen.dart` - Interactive security testing UI (650+ lines)
+
+**Modified Files:**
+- `lib/main.dart` - Added route and navigation for security demo
+- `README.md` - Comprehensive Firestore Security documentation
+
+### 🎓 Learning Outcomes
+
+**Why Firestore Security Rules Are Critical:**
+
+Firestore databases start in "test mode" with completely open access. This is convenient for initial development but catastrophically insecure for production. Without security rules:
+- Any user can read all data (privacy violation)
+- Malicious actors can delete entire collections
+- Spam and abuse become trivial
+- Legal liability (GDPR, CCPA violations)
+- No way to enforce business logic at database level
+
+Security rules provide:
+1. **Authentication Layer**: Verify user identity
+2. **Authorization Layer**: Control what authenticated users can access
+3. **Data Validation**: Enforce schema and business rules
+4. **Audit Trail**: Firebase logs all rule evaluations
+
+**Key Concepts Learned:**
+
+1. **request.auth Object**: How Firebase Auth integrates with Firestore
+2. **Path Variables**: Using `{uid}` to create dynamic rules
+3. **Resource vs Request**: Difference between existing and new data
+4. **Deny by Default**: Secure architecture principle
+5. **Testing Security**: How to verify rules work as expected
+
+**Production Checklist:**
+- ✅ Authentication enabled
+- ✅ Security rules deployed
+- ✅ Test mode disabled (`if true` removed)
+- ✅ UID validation on all user data
+- ✅ Rules tested in playground
+- ✅ Error handling in Flutter app
+- ✅ Monitoring enabled in Firebase Console
+
+### 📚 Resources
+
+- [Firestore Security Rules Official Docs](https://firebase.google.com/docs/firestore/security/get-started)
+- [Rules Language Reference](https://firebase.google.com/docs/reference/rules/rules)
+- [Common Security Rules Patterns](https://firebase.google.com/docs/firestore/security/rules-conditions)
+- [Testing Security Rules](https://firebase.google.com/docs/rules/unit-tests)
+- [Firebase Security Best Practices](https://firebase.google.com/support/guides/security-checklist)
 
 ---
 

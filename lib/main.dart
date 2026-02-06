@@ -17,6 +17,7 @@ import 'screens/query_filter_demo_screen.dart';
 import 'screens/storage_upload_screen.dart';
 import 'screens/cloud_functions_demo_screen.dart';
 import 'screens/push_notifications_demo_screen.dart';
+import 'screens/firestore_security_demo_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
         '/explicitAnimations': (context) => const ExplicitAnimationDemo(),
         '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
         '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
+        '/firestoreSecurity': (context) => const FirestoreSecurityDemoScreen(),
       },
     );
   }
@@ -398,6 +400,72 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.deepPurple,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Firestore Security Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.red.shade600,
+                                  Colors.pink.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.security,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '🔐 Firestore Security',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const FirestoreSecurityDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.shield),
+                                  label: const Text('Open Security Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.red,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,
