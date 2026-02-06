@@ -22,9 +22,13 @@ dependencies:
   cloud_firestore: ^5.0.0
   firebase_storage: ^12.0.0
   cloud_functions: ^5.0.0
+  firebase_messaging: ^15.0.0
   
   # Media selection
   image_picker: ^1.0.0
+  
+  # Local notifications for displaying FCM messages
+  flutter_local_notifications: ^17.0.0
 
 dev_dependencies:
   flutter_test:
