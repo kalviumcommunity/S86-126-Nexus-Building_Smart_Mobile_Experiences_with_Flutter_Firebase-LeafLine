@@ -67,10 +67,24 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **Location Permissions**: Android and iOS permission management with geolocator
 - **Comprehensive Guides**: GOOGLE_MAPS_SETUP_GUIDE.md, GOOGLE_MAPS_QUICK_START.md, USER_LOCATION_MARKERS_GUIDE.md
 
-### 8. Firebase Authentication
-- User registration and login
-- Secure authentication flow
-- Session management
+### 8. CRUD Operations 📝
+- **Complete CRUD Workflow**: Create, Read, Update, Delete operations with Firestore
+- **User-Specific Data**: Each user manages their own items under `/users/{uid}/items`
+- **Real-Time Sync**: StreamBuilder for automatic UI updates when data changes
+- **Advanced Features**: Search, category filtering, completion tracking, batch operations
+- **Beautiful UI**: Material Design 3 with swipe-to-delete, dialogs, and floating action buttons
+- **Data Model**: UserItem class with title, description, category, timestamps, and completion status
+- **Service Layer**: CrudService class with all CRUD methods, error handling, and statistics
+- **Security Rules**: User-scoped Firestore rules with data validation
+- **Statistics Dashboard**: Total, active, completed counts with category breakdown
+- **Comprehensive Guide**: CRUD_GUIDE.md with step-by-step implementation details
+
+### 9. Firebase Authentication
+- **Email/Password Authentication**: Secure user registration and login
+- **Authentication Flow**: Login screen with form validation
+- **Session Management**: Persistent user sessions across app restarts
+- **User-Scoped Data**: All CRUD operations tied to authenticated user
+- **Auth State Changes**: Real-time authentication state monitoring
 
 ### 3. Scrollable Views
 - ListView and GridView implementations
@@ -3538,7 +3552,543 @@ flutter run
 
 ---
 
+## 📝 CRUD Operations (Create, Read, Update, Delete)
+
+### ✨ Features Implemented
+- ✅ **Complete CRUD Workflow**: Full Create, Read, Update, Delete implementation
+- ✅ **User-Specific Data**: Each user sees only their own items
+- ✅ **Real-Time Synchronization**: StreamBuilder for instant UI updates
+- ✅ **Advanced Search**: Client-side search by title and description
+- ✅ **Category Filtering**: Filter items by category (Personal, Work, Shopping, etc.)
+- ✅ **Completion Tracking**: Mark items as complete/incomplete
+- ✅ **Batch Operations**: Delete multiple items efficiently
+- ✅ **Statistics Dashboard**: View total, active, completed counts
+- ✅ **Beautiful UI**: Material Design 3 with swipe-to-delete and dialogs
+
+### 🔥 Technical Implementation
+
+#### **Data Structure**
+
+Items are stored in Firestore under:
+```
+/users/{uid}/items/{itemId}
+```
+
+Each item document contains:
+```json
+{
+  "title": "My Task",
+  "description": "Complete assignment",
+  "category": "Work",
+  "isCompleted": false,
+  "createdAt": 1707523200000,
+  "updatedAt": 1707609600000
+}
+```
+
+#### **1. Data Model**
+
+```dart
+class UserItem {
+  final String id;
+  final String title;
+  final String description;
+  final int createdAt;
+  final int? updatedAt;
+  final String? category;
+  final bool isCompleted;
+
+  const UserItem({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.createdAt,
+    this.updatedAt,
+    this.category,
+    this.isCompleted = false,
+  });
+
+  factory UserItem.fromFirestore(String id, Map<String, dynamic> data) {
+    return UserItem(
+      id: id,
+      title: data['title'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      createdAt: data['createdAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
+      updatedAt: data['updatedAt'] as int?,
+      category: data['category'] as String?,
+      isCompleted: data['isCompleted'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'title': title,
+      'description': description,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'category': category,
+      'isCompleted': isCompleted,
+    };
+  }
+}
+```
+
+#### **2. CREATE Operation**
+
+```dart
+Future<String> createItem({
+  required String title,
+  required String description,
+  String? category,
+  bool isCompleted = false,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final now = DateTime.now().millisecondsSinceEpoch;
+
+  final docRef = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .add({
+    'title': title,
+    'description': description,
+    'category': category,
+    'isCompleted': isCompleted,
+    'createdAt': now,
+    'updatedAt': null,
+  });
+
+  return docRef.id;
+}
+```
+
+**Usage:**
+```dart
+await crudService.createItem(
+  title: 'Complete Assignment',
+  description: 'Finish Flutter CRUD implementation',
+  category: 'Work',
+);
+```
+
+#### **3. READ Operation (Real-Time)**
+
+```dart
+Stream<List<UserItem>> getItemsStream({
+  String? category,
+  bool? isCompleted,
+}) {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  Query<Map<String, dynamic>> query = FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items');
+
+  // Apply filters
+  if (category != null) {
+    query = query.where('category', isEqualTo: category);
+  }
+  if (isCompleted != null) {
+    query = query.where('isCompleted', isEqualTo: isCompleted);
+  }
+
+  // Order by creation date (newest first)
+  query = query.orderBy('createdAt', descending: true);
+
+  return query.snapshots().map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return UserItem.fromFirestore(doc.id, doc.data());
+    }).toList();
+  });
+}
+```
+
+**Usage in UI with StreamBuilder:**
+```dart
+StreamBuilder<List<UserItem>>(
+  stream: crudService.getItemsStream(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const CircularProgressIndicator();
+    }
+
+    if (snapshot.hasError) {
+      return Text('Error: ${snapshot.error}');
+    }
+
+    final items = snapshot.data ?? [];
+
+    if (items.isEmpty) {
+      return const Text('No items yet');
+    }
+
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ListTile(
+          title: Text(item.title),
+          subtitle: Text(item.description),
+          leading: Checkbox(
+            value: item.isCompleted,
+            onChanged: (_) => toggleCompletion(item),
+          ),
+        );
+      },
+    );
+  },
+)
+```
+
+#### **4. UPDATE Operation**
+
+```dart
+Future<void> updateItem({
+  required String itemId,
+  String? title,
+  String? description,
+  String? category,
+  bool? isCompleted,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  final Map<String, dynamic> updates = {
+    'updatedAt': DateTime.now().millisecondsSinceEpoch,
+  };
+
+  if (title != null) updates['title'] = title;
+  if (description != null) updates['description'] = description;
+  if (category != null) updates['category'] = category;
+  if (isCompleted != null) updates['isCompleted'] = isCompleted;
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .doc(itemId)
+      .update(updates);
+}
+```
+
+**Usage:**
+```dart
+// Update title only
+await crudService.updateItem(
+  itemId: 'abc123',
+  title: 'Updated Title',
+);
+
+// Update multiple fields
+await crudService.updateItem(
+  itemId: 'abc123',
+  title: 'New Title',
+  description: 'New description',
+  isCompleted: true,
+);
+```
+
+#### **5. DELETE Operation**
+
+```dart
+Future<void> deleteItem(String itemId) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .doc(itemId)
+      .delete();
+}
+```
+
+**Usage:**
+```dart
+await crudService.deleteItem('abc123');
+```
+
+**Swipe-to-Delete UI:**
+```dart
+Dismissible(
+  key: Key(item.id),
+  background: Container(
+    color: Colors.red,
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    child: const Icon(Icons.delete, color: Colors.white),
+  ),
+  direction: DismissDirection.endToStart,
+  confirmDismiss: (_) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Item'),
+        content: Text('Delete "${item.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  },
+  onDismissed: (_) => crudService.deleteItem(item.id),
+  child: ListTile(...),
+)
+```
+
+### 🔒 Firestore Security Rules
+
+```javascript
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      // User can only access their own data
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      
+      match /items/{itemId} {
+        // User can only access their own items
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+        
+        // Validation for create operations
+        allow create: if request.auth != null && 
+                         request.auth.uid == uid &&
+                         request.resource.data.keys().hasAll(['title', 'description', 'createdAt']) &&
+                         request.resource.data.title is string &&
+                         request.resource.data.description is string &&
+                         request.resource.data.createdAt is int;
+        
+        // Validation for update operations
+        allow update: if request.auth != null && 
+                         request.auth.uid == uid &&
+                         request.resource.data.title is string &&
+                         request.resource.data.description is string;
+      }
+    }
+  }
+}
+```
+
+**What These Rules Do:**
+1. ✅ **Authentication Required**: `request.auth != null`
+2. ✅ **User Isolation**: `request.auth.uid == uid`
+3. ✅ **Data Validation**: Required fields and type checking
+4. ✅ **Prevents Unauthorized Access**: Users can't read/write others' data
+
+### 📱 UI Features
+
+**Demo Screen:** `lib/screens/crud_demo_screen.dart`
+
+**Components:**
+1. **User Info Banner**
+   - Display current user email
+   - Visual feedback for logged-in state
+
+2. **Search Bar**
+   - Real-time search by title/description
+   - Clear button to reset search
+
+3. **Filter Chips**
+   - Category filter (Personal, Work, Shopping, Ideas, Tasks, Notes)
+   - Status filter (Active, Completed, All)
+   - Clear filters button
+
+4. **Item List**
+   - Real-time updates via StreamBuilder
+   - Swipe-to-delete gesture
+   - Checkbox for completion toggle
+   - Long-press or menu for edit/delete
+
+5. **Create/Edit Dialogs**
+   - Text fields for title and description
+   - Dropdown for category selection
+   - Form validation
+
+6. **Statistics**
+   - Total items count
+   - Active vs completed breakdown
+   - Category distribution
+
+7. **Batch Operations**
+   - Clear completed items
+   - Delete all items (with confirmation)
+
+### 🚀 Getting Started
+
+#### **Step 1: Ensure User is Authenticated**
+
+```dart
+final user = FirebaseAuth.instance.currentUser;
+if (user == null) {
+  // Navigate to login screen
+  Navigator.of(context).pushReplacementNamed('/login');
+  return;
+}
+```
+
+#### **Step 2: Navigate to CRUD Demo**
+
+From the home screen, tap the "📝 CRUD Operations" button.
+
+#### **Step 3: Create Your First Item**
+
+1. Tap the floating action button (+ New Item)
+2. Enter a title (required)
+3. Add a description (optional)
+4. Select a category (optional)
+5. Tap "Create"
+
+#### **Step 4: Manage Items**
+
+- ✅ **Mark Complete**: Tap the checkbox
+- ✅ **Edit**: Tap item menu (⋮) → Edit
+- ✅ **Delete**: Swipe left or tap menu → Delete
+- ✅ **Filter**: Use category and status chips
+- ✅ **Search**: Tap search icon and type query
+
+### 🎯 Testing Checklist
+
+- [ ] **Create Item**: Add new item appears in list immediately
+- [ ] **Read Items**: List shows all user's items in real-time
+- [ ] **Update Item**: Edit title/description updates instantly
+- [ ] **Delete Item**: Swipe or menu delete removes item
+- [ ] **Toggle Completion**: Checkbox marks item complete with green border
+- [ ] **Filter by Category**: Category chips filter correctly
+- [ ] **Filter by Status**: Active/Completed filters work
+- [ ] **Search**: Find items by title or description
+- [ ] **Statistics**: Accurate counts and category breakdown
+- [ ] **Clear Completed**: Removes all completed items
+- [ ] **User Isolation**: Can't see other users' items
+- [ ] **Offline Support**: Works offline, syncs when back online
+
+### 🐛 Common Issues & Solutions
+
+#### Issue 1: PERMISSION_DENIED Error
+
+**Cause:** User not authenticated or wrong UID in security rules
+
+**Solution:**
+1. Ensure user is logged in: `FirebaseAuth.instance.currentUser != null`
+2. Deploy updated Firestore rules: `firebase deploy --only firestore:rules`
+3. Check UID matches in Firestore Console
+
+#### Issue 2: UI Not Updating
+
+**Cause:** Using FutureBuilder instead of StreamBuilder
+
+**Solution:**
+Use StreamBuilder for real-time updates:
+```dart
+StreamBuilder<List<UserItem>>(
+  stream: crudService.getItemsStream(), // Not getAllItems()
+  ...
+)
+```
+
+#### Issue 3: Duplicate Items
+
+**Cause:** Rapid button clicks without loading state
+
+**Solution:**
+Add loading state to prevent duplicate submissions:
+```dart
+bool _isLoading = false;
+
+Future<void> _createItem() async {
+  if (_isLoading) return;
+  setState(() => _isLoading = true);
+  
+  try {
+    await crudService.createItem(...);
+  } finally {
+    setState(() => _isLoading = false);
+  }
+}
+```
+
+### 💡 Real-World Use Cases
+
+**Implemented in LeafLine:**
+- 📝 **Personal Items Manager**: Notes, tasks, ideas organized by category
+- ✅ **Task Tracking**: Mark items complete, filter by status
+- 🔍 **Search & Filter**: Find items quickly with search and category filters
+- 📊 **Statistics**: Track productivity with completion metrics
+
+**Production Applications:**
+- 📓 **Note-Taking Apps** (Evernote, Google Keep): Rich notes with tags
+- ✅ **To-Do Lists** (Todoist, Any.do): Task management with due dates
+- 🛒 **Shopping Lists** (AnyList): Grocery items with quantities
+- 📔 **Diaries/Journals**: Daily entries with mood tracking
+- 💼 **Project Management** (Trello, Asana): Cards and tasks
+- 📱 **Contact Management**: Store and organize contacts
+- 🎯 **Goal Tracking**: Personal goals with progress tracking
+- 📚 **Reading Lists**: Books to read with ratings and notes
+
+### 📁 Files Created/Modified
+
+**New Files:**
+- `lib/models/user_item.dart` - Data model for items (120 lines)
+- `lib/services/crud_service.dart` - Service for CRUD operations (450+ lines)
+- `lib/screens/crud_demo_screen.dart` - CRUD UI implementation (1000+ lines)
+- `CRUD_GUIDE.md` - Comprehensive documentation (1500+ lines)
+
+**Modified Files:**
+- `firestore.rules` - Added security rules for items subcollection
+- `lib/main.dart` - Added route and navigation button for CRUD demo
+- `README.md` - Complete CRUD documentation section
+
+### 📚 Resources
+
+- [Firestore CRUD Operations](https://firebase.google.com/docs/firestore/manage-data/add-data)
+- [StreamBuilder Documentation](https://api.flutter.dev/flutter/widgets/StreamBuilder-class.html)
+- [Firestore Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
+- [Firebase Auth Usage](https://firebase.flutter.dev/docs/auth/usage/)
+- [CRUD_GUIDE.md](CRUD_GUIDE.md) - Complete implementation guide with advanced features and best practices
+
+---
+
 ## 🆕 Latest Updates
+
+### CRUD Operations Implementation - February 9, 2026
+
+Complete CRUD (Create, Read, Update, Delete) workflow with Firebase Authentication and Cloud Firestore:
+
+**✨ What's New:**
+- ✅ **Full CRUD Workflow**: Create, Read, Update, Delete operations with user-specific data
+- ✅ **Real-Time Sync**: StreamBuilder for instant UI updates across devices
+- ✅ **User Authentication**: Each user sees only their own items (/users/{uid}/items)
+- ✅ **Data Model**: UserItem class with title, description, category, timestamps, completion status
+- ✅ **CRUD Service**: CrudService class with all operations, error handling, statistics
+- ✅ **Advanced Features**: Search, category filtering, batch operations, completion tracking
+- ✅ **Beautiful UI**: Material Design 3 with swipe-to-delete, dialogs, floating action buttons
+- ✅ **Security Rules**: Firestore rules with authentication and data validation
+- ✅ **Statistics Dashboard**: Total, active, completed counts with category breakdown
+- ✅ **Comprehensive Guide**: CRUD_GUIDE.md with 1500+ lines of documentation
+
+**🎯 Quick Start:**
+```bash
+# 1. Ensure user is logged in via Firebase Authentication
+# 2. Navigate to "CRUD Operations" from home screen
+# 3. Tap + button to create first item
+# 4. Use search, filters, and actions to manage items
+```
+
+**📖 Documentation:**
+- Complete implementation guide in CRUD_GUIDE.md
+- Database structure: /users/{uid}/items/{itemId}
+- Real-time updates with StreamBuilder
+- Swipe-to-delete, category filters, search functionality
+
+---
 
 ### Google Maps Integration - February 9, 2026
 
@@ -3603,6 +4153,612 @@ flutter run
 - Step-by-step testing guide in QUICK_TEST_GUIDE.md
 - Comprehensive troubleshooting in FCM_SETUP_GUIDE.md
 - Platform-specific setup instructions for Android and iOS
+
+---
+
+#### Task 7: Complete CRUD Operations 📝
+
+**Implementation:** Complete
+- Full Create, Read, Update, Delete workflow with Firestore
+- User-specific data isolation with authentication
+- Real-time UI updates with StreamBuilder
+- Advanced features: search, filtering, categories, statistics
+- Production-ready service layer and error handling
+
+**Commit message:**
+```
+feat: implemented complete CRUD operations with user authentication
+```
+
+**Pull request title:**
+```
+[Sprint-2] Complete CRUD Operations – [Your Team Name]
+```
+
+**PR Description:**
+
+## 📝 Complete CRUD Operations Implementation
+
+### ✨ Features Implemented
+- ✅ **Create Operation**: Add new items with title, description, and category
+- ✅ **Read Operation**: Real-time item list with StreamBuilder
+- ✅ **Update Operation**: Edit existing items with form dialogs
+- ✅ **Delete Operation**: Remove items with swipe gesture and confirmation
+- ✅ **User Authentication**: All operations require Firebase Auth
+- ✅ **Data Isolation**: Each user sees only their own items
+- ✅ **Advanced Search**: Filter items by title/description
+- ✅ **Category Management**: Organize items by category (Personal, Work, etc.)
+- ✅ **Statistics Dashboard**: View total, active, completed counts
+
+### 🔥 Technical Implementation
+
+#### **1. Data Structure**
+
+**Firestore Path:**
+```
+/users/{uid}/items/{itemId}
+```
+
+**Document Schema:**
+```json
+{
+  "title": "Complete Flutter Assignment",
+  "description": "Implement CRUD operations with Firestore",
+  "category": "Work",
+  "isCompleted": false,
+  "createdAt": 1707523200000,
+  "updatedAt": 1707609600000
+}
+```
+
+**Security Rules:**
+```javascript
+match /users/{uid}/items/{itemId} {
+  allow read, write: if request.auth.uid == uid;
+  
+  // Validation for create
+  allow create: if request.auth.uid == uid &&
+                   request.resource.data.title is string &&
+                   request.resource.data.description is string;
+}
+```
+
+#### **2. CREATE Operation**
+
+**Service Method:**
+```dart
+Future<void> createItem({
+  required String title,
+  required String description,
+  String? category,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .add({
+    'title': title,
+    'description': description,
+    'category': category ?? 'Personal',
+    'isCompleted': false,
+    'createdAt': FieldValue.serverTimestamp(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+}
+```
+
+**Flutter UI:**
+```dart
+Future<void> _showCreateDialog() async {
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Create New Item'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(labelText: 'Title'),
+          ),
+          TextField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(labelText: 'Description'),
+            maxLines: 3,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _createItem,
+          child: const Text('Create'),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+**Result:**
+- ✅ New document created in Firestore
+- ✅ UI updates automatically via StreamBuilder
+- ✅ Timestamp added using `FieldValue.serverTimestamp()`
+- ✅ User can only create items under their own UID
+
+#### **3. READ Operation (Real-Time)**
+
+**StreamBuilder Implementation:**
+```dart
+StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .orderBy('createdAt', descending: true)
+      .snapshots(),
+  builder: (context, snapshot) {
+    // Loading state
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const CircularProgressIndicator();
+    }
+    
+    // Error state
+    if (snapshot.hasError) {
+      return Text('Error: ${snapshot.error}');
+    }
+    
+    // Empty state
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return const Center(
+        child: Text('No items yet. Tap + to create one!'),
+      );
+    }
+    
+    // Data display
+    final docs = snapshot.data!.docs;
+    
+    return ListView.builder(
+      itemCount: docs.length,
+      itemBuilder: (context, index) {
+        final doc = docs[index];
+        final data = doc.data() as Map<String, dynamic>;
+        final docId = doc.id;
+        
+        return ListTile(
+          title: Text(data['title'] ?? 'Untitled'),
+          subtitle: Text(data['description'] ?? ''),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _deleteItem(docId),
+          ),
+          onTap: () => _updateItem(docId, data),
+        );
+      },
+    );
+  },
+)
+```
+
+**Key Features:**
+- 🔄 **Real-Time Sync**: UI updates automatically on Firestore changes
+- 📊 **Query Support**: Order by `createdAt`, filter by category
+- ⚡ **Performance**: Only subscribed items stream (user-specific)
+- 🎨 **State Management**: Loading, error, empty, data states handled
+
+#### **4. UPDATE Operation**
+
+**Service Method:**
+```dart
+Future<void> updateItem({
+  required String itemId,
+  required String title,
+  required String description,
+  String? category,
+  bool? isCompleted,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  final updates = <String, dynamic>{
+    'title': title,
+    'description': description,
+    'updatedAt': FieldValue.serverTimestamp(),
+  };
+  
+  if (category != null) updates['category'] = category;
+  if (isCompleted != null) updates['isCompleted'] = isCompleted;
+  
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .doc(itemId)
+      .update(updates);
+}
+```
+
+**Flutter UI:**
+```dart
+Future<void> _updateItem(String docId, Map<String, dynamic> data) async {
+  // Pre-fill form with existing data
+  _titleController.text = data['title'] ?? '';
+  _descriptionController.text = data['description'] ?? '';
+  
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Update Item'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(controller: _titleController),
+          TextField(controller: _descriptionController, maxLines: 3),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await _updateItemInFirestore(docId);
+            Navigator.pop(context);
+          },
+          child: const Text('Update'),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+**Toggle Completion:**
+```dart
+Future<void> _toggleCompletion(String itemId, bool currentStatus) async {
+  await _itemsCollection.doc(itemId).update({
+    'isCompleted': !currentStatus,
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+}
+```
+
+**Result:**
+- ✅ Only specified fields updated (using `.update()`)
+- ✅ `updatedAt` timestamp refreshed
+- ✅ UI reflects changes instantly
+- ✅ Can toggle completion without full form
+
+#### **5. DELETE Operation**
+
+**Service Method:**
+```dart
+Future<void> deleteItem(String itemId) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .doc(itemId)
+      .delete();
+}
+```
+
+**Swipe-to-Delete:**
+```dart
+Dismissible(
+  key: Key(docId),
+  direction: DismissDirection.endToStart,
+  background: Container(
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    color: Colors.red,
+    child: const Icon(Icons.delete, color: Colors.white),
+  ),
+  confirmDismiss: (direction) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Item'),
+        content: const Text('Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  },
+  onDismissed: (direction) => _deleteItem(docId),
+  child: ListTile(...),
+)
+```
+
+**Result:**
+- ✅ Document permanently removed from Firestore
+- ✅ UI updates automatically (StreamBuilder)
+- ✅ Confirmation dialog prevents accidental deletion
+- ✅ Swipe gesture for quick delete
+
+#### **6. Advanced Features**
+
+**Search Functionality:**
+```dart
+List<UserItem> _searchItems(List<UserItem> allItems, String query) {
+  if (query.isEmpty) return allItems;
+  
+  return allItems.where((item) {
+    final titleMatches = item.title.toLowerCase().contains(query.toLowerCase());
+    final descMatches = item.description.toLowerCase().contains(query.toLowerCase());
+    return titleMatches || descMatches;
+  }).toList();
+}
+```
+
+**Category Filtering:**
+```dart
+Stream<QuerySnapshot> getItemsByCategory(String category) {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .where('category', isEqualTo: category)
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+}
+```
+
+**Statistics:**
+```dart
+Future<Map<String, int>> getStatistics() async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  
+  final snapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .collection('items')
+      .get();
+  
+  final total = snapshot.docs.length;
+  final completed = snapshot.docs.where((doc) {
+    return (doc.data()['isCompleted'] ?? false) == true;
+  }).length;
+  
+  return {
+    'total': total,
+    'completed': completed,
+    'active': total - completed,
+  };
+}
+```
+
+### 💡 Why CRUD Matters
+
+**Real-World Applications:**
+- 📝 **Notes Apps**: Create notes, edit, organize, delete (Evernote, Google Keep)
+- ✅ **Task Managers**: Add tasks, mark complete, edit details (Todoist, Trello)
+- 🛒 **Shopping Lists**: Add items, check off, remove (AnyList)
+- 💬 **Chat Apps**: Send messages (create), display (read), edit/delete
+- 📧 **Email Apps**: Compose (create), inbox (read), update labels, delete
+- 👤 **Profile Management**: Create profile, view, update info, delete account
+
+**Benefits of CRUD with Firebase:**
+1. ✅ **Real-Time Sync**: Changes appear instantly across all devices
+2. ✅ **Offline Support**: Firestore caches data, syncs when online
+3. ✅ **Security**: Rules prevent unauthorized access
+4. ✅ **Scalability**: Handles millions of documents automatically
+5. ✅ **No Backend Code**: Direct client-to-database communication
+
+### 🎯 CRUD Best Practices
+
+#### **1. User Authentication Required**
+```dart
+if (FirebaseAuth.instance.currentUser == null) {
+  throw Exception('User must be authenticated for CRUD operations');
+}
+```
+
+#### **2. Error Handling**
+```dart
+try {
+  await _createItem();
+} on FirebaseException catch (e) {
+  if (e.code == 'permission-denied') {
+    _showError('You don\'t have permission to perform this action');
+  } else if (e.code == 'unavailable') {
+    _showError('Network error. Please check your connection');
+  } else {
+    _showError('Error: ${e.message}');
+  }
+}
+```
+
+#### **3. Input Validation**
+```dart
+Future<void> _createItem() async {
+  // Validate before Firestore call
+  if (_titleController.text.trim().isEmpty) {
+    _showError('Title cannot be empty');
+    return;
+  }
+  
+  if (_titleController.text.length > 100) {
+    _showError('Title too long (max 100 characters)');
+    return;
+  }
+  
+  // Proceed with creation
+  await _itemsCollection.add({...});
+}
+```
+
+#### **4. Loading States**
+```dart
+bool _isLoading = false;
+
+Future<void> _createItem() async {
+  setState(() => _isLoading = true);
+  
+  try {
+    await _itemsCollection.add({...});
+  } finally {
+    setState(() => _isLoading = false);
+  }
+}
+
+// In build method
+ElevatedButton(
+  onPressed: _isLoading ? null : _createItem,
+  child: _isLoading 
+      ? const CircularProgressIndicator()
+      : const Text('Create'),
+)
+```
+
+#### **5. Timestamps**
+```dart
+// Use server timestamp (not client time)
+await _itemsCollection.add({
+  'title': title,
+  'createdAt': FieldValue.serverTimestamp(), // ✅ Correct
+  // 'createdAt': DateTime.now().millisecondsSinceEpoch, // ❌ Avoid
+});
+```
+
+### 📊 CRUD vs Other Patterns
+
+| Pattern | Create | Read | Update | Delete | Use Case |
+|---------|--------|------|--------|--------|----------|
+| **CRUD** | ✅ | ✅ | ✅ | ✅ | User data, notes, tasks |
+| **Read-Only** | ❌ | ✅ | ❌ | ❌ | News feeds, catalogs |
+| **Append-Only** | ✅ | ✅ | ❌ | ❌ | Chat messages, logs |
+| **Event Sourcing** | ✅ | ✅ | ➕ | ❌ | Audit trails, history |
+
+### 🐛 Common Issues & Solutions
+
+**Issue 1: PERMISSION_DENIED on CRUD Operations**
+- **Cause**: Security rules not allowing user access
+- **Fix**: 
+  ```javascript
+  match /users/{uid}/items/{itemId} {
+    allow read, write: if request.auth.uid == uid;
+  }
+  ```
+
+**Issue 2: UI Not Updating After CRUD**
+- **Cause**: Not using StreamBuilder
+- **Fix**: Use `.snapshots()` instead of `.get()`
+  ```dart
+  // ❌ Wrong - one-time read
+  final snapshot = await _itemsCollection.get();
+  
+  // ✅ Correct - real-time stream
+  stream: _itemsCollection.snapshots()
+  ```
+
+**Issue 3: Update Fails with "Document Not Found"**
+- **Cause**: Wrong document ID or item deleted
+- **Fix**: Check `doc.id` and handle errors
+  ```dart
+  try {
+    await _itemsCollection.doc(itemId).update({...});
+  } on FirebaseException catch (e) {
+    if (e.code == 'not-found') {
+      _showError('Item no longer exists');
+    }
+  }
+  ```
+
+**Issue 4: Duplicate Items Created**
+- **Cause**: Multiple rapid button taps
+- **Fix**: Disable button during creation
+  ```dart
+  bool _isCreating = false;
+  
+  onPressed: _isCreating ? null : _createItem
+  ```
+
+**Issue 5: Slow CRUD Operations**
+- **Cause**: No indexes or large documents
+- **Fix**: 
+  - Add Firestore indexes for queries
+  - Limit document size (<1MB)
+  - Use pagination for large lists
+
+### 📁 Files Created/Modified
+
+**New Files:**
+- `lib/screens/crud_demo_screen.dart` - Complete CRUD UI (1000+ lines)
+- `lib/services/crud_service.dart` - Service layer with all CRUD methods
+- `lib/models/user_item.dart` - Data model for items
+
+**Modified Files:**
+- `firestore.rules` - Added security rules for items collection
+- `lib/main.dart` - Added route `/crudDemo` and navigation
+- `README.md` - Complete CRUD documentation
+
+**Security Rules Added:**
+```javascript
+match /users/{uid}/items/{itemId} {
+  allow read, write: if request.auth.uid == uid;
+  
+  allow create: if request.auth.uid == uid &&
+                   request.resource.data.title is string &&
+                   request.resource.data.description is string;
+}
+```
+
+### 🎓 Learning Outcomes
+
+**What You Learned:**
+
+1. **CRUD Fundamentals**: Understanding Create, Read, Update, Delete as building blocks of data-driven apps
+2. **Firestore Integration**: How to structure collections, add documents, query data, and update/delete
+3. **Real-Time UI**: Using StreamBuilder for automatic UI updates when Firestore changes
+4. **User Authentication**: Tying all CRUD operations to authenticated user's UID
+5. **Security Rules**: Protecting user data with Firestore rules to prevent unauthorized access
+6. **Error Handling**: Gracefully handling network errors, permission denials, and edge cases
+7. **UX Best Practices**: Loading states, confirmation dialogs, empty states, swipe gestures
+
+**Key Insights:**
+
+- **Firestore is NoSQL**: Documents with flexible schema, not rigid tables
+- **Real-Time by Default**: `.snapshots()` provides live updates, `.get()` is one-time
+- **Server Timestamps**: Use `FieldValue.serverTimestamp()` for consistency across devices
+- **Subcollections**: Organize data hierarchically (`/users/{uid}/items/{itemId}`)
+- **StreamBuilder Magic**: Rebuilds UI automatically when stream emits new data
+
+**Production Checklist:**
+- ✅ Authentication required for all CRUD operations
+- ✅ Security rules deployed and tested
+- ✅ Input validation on client and server (rules)
+- ✅ Error handling with user-friendly messages
+- ✅ Loading states prevent duplicate operations
+- ✅ Confirmation dialogs for destructive actions (delete)
+- ✅ Empty states guide users to create first item
+- ✅ Real-time sync using StreamBuilder
+
+### 📚 Resources
+
+- [Firestore CRUD Documentation](https://firebase.google.com/docs/firestore/manage-data/add-data)
+- [StreamBuilder Widget](https://api.flutter.dev/flutter/widgets/StreamBuilder-class.html)
+- [Firestore Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
+- [Flutter CRUD Tutorial](https://firebase.flutter.dev/docs/firestore/usage/)
+- [Best Practices for Firestore](https://firebase.google.com/docs/firestore/best-practices)
 
 ---
 

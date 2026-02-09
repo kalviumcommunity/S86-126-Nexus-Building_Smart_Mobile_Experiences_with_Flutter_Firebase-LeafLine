@@ -19,6 +19,7 @@ import 'screens/cloud_functions_demo_screen.dart';
 import 'screens/push_notifications_demo_screen.dart';
 import 'screens/firestore_security_demo_screen.dart';
 import 'screens/google_maps_demo_screen.dart';
+import 'screens/crud_demo_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
         '/firestoreSecurity': (context) => const FirestoreSecurityDemoScreen(),
         '/googleMaps': (context) => const GoogleMapsDemoScreen(),
+        '/crudDemo': (context) => const CrudDemoScreen(),
       },
     );
   }
@@ -834,6 +836,75 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.teal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // CRUD Operations Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.indigo.shade600,
+                                  Colors.purple.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.edit_note, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '📝 CRUD Operations',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Create, Read, Update, Delete',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const CrudDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.list_alt),
+                                  label: const Text('Open CRUD Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.indigo,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,
