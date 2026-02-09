@@ -18,6 +18,7 @@ import 'screens/storage_upload_screen.dart';
 import 'screens/cloud_functions_demo_screen.dart';
 import 'screens/push_notifications_demo_screen.dart';
 import 'screens/firestore_security_demo_screen.dart';
+import 'screens/google_maps_demo_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
         '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
         '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
         '/firestoreSecurity': (context) => const FirestoreSecurityDemoScreen(),
+        '/googleMaps': (context) => const GoogleMapsDemoScreen(),
       },
     );
   }
@@ -771,7 +773,76 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ],
                             ),
                           ),
+                          const SizedBox(height: 20),
 
+                          // Google Maps Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.teal.shade600,
+                                  Colors.cyan.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.teal.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.map, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '🗺️ Google Maps',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Interactive Maps & User Location',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const GoogleMapsDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.location_on),
+                                  label: const Text('Open Maps Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.teal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 20),
 
                           // Animation Demos Section

@@ -40,11 +40,13 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 ### 5. Push Notifications (Firebase Cloud Messaging) 🔔
 - **FCM Integration**: Firebase Cloud Messaging for push notifications
 - **Multi-State Handling**: Foreground, background, and terminated state notifications
-- **Device Token Management**: Unique token for each device
-- **Topic Subscription**: Subscribe/unsubscribe to notification topics
+- **Device Token Management**: Unique token for each device with copy-to-clipboard
+- **Topic Subscription**: Subscribe/unsubscribe to notification topics (e.g., news, plants)
 - **Local Notifications**: Display notifications with flutter_local_notifications
-- **Real-Time Message Display**: Live notification feed in app
-- **Permission Handling**: Request and manage notification permissions
+- **Real-Time Message Display**: Live notification feed in app with timestamps
+- **Permission Handling**: Request and manage notification permissions (iOS & Android)
+- **Platform Configurations**: Android 13+ POST_NOTIFICATIONS and iOS background modes
+- **Comprehensive Guides**: FCM_SETUP_GUIDE.md and QUICK_TEST_GUIDE.md for easy testing
 
 ### 6. Firestore Security Rules 🔐
 - **Authentication-Protected Database**: Firestore secured with Firebase Auth
@@ -54,7 +56,16 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **Secure Collections**: Users, plants, notes with granular permissions
 - **Deployment Guide**: Firebase Console and CLI deployment instructions
 
-### 7. Firebase Authentication
+### 7. Google Maps Integration 🗺️
+- **Interactive Maps**: Pan, zoom, and tap-to-add markers with Google Maps SDK
+- **User Location**: Real-time GPS tracking with permission handling
+- **Custom Markers**: Red (landmarks), Blue (current location), Green (custom pins)
+- **Multiple Map Types**: Normal, Satellite, and Terrain views
+- **Quick Navigation**: Pre-configured locations (India Gate, Qutub Minar, Red Fort, etc.)
+- **Location Permissions**: Android and iOS permission management with geolocator
+- **Comprehensive Guides**: GOOGLE_MAPS_SETUP_GUIDE.md (detailed) and GOOGLE_MAPS_QUICK_START.md (10-min)
+
+### 8. Firebase Authentication
 - User registration and login
 - Secure authentication flow
 - Session management
@@ -1890,17 +1901,20 @@ These patterns scale to production:
 
 #### Task 5: Firebase Cloud Messaging (Push Notifications) 🔔
 
-**Implementation:** Complete
-- Firebase Cloud Messaging (FCM) integration
-- NotificationService for handling all FCM operations
+**Implementation:** ✅ Complete (Latest Update: February 9, 2026)
+- Firebase Cloud Messaging (FCM) integration with full multi-state support
+- NotificationService for handling all FCM operations (300+ lines)
 - Multi-state notification handling (foreground, background, terminated)
 - Device token management and topic subscriptions
-- Interactive demo screen with real-time notification feed
+- Interactive demo screen with real-time notification feed (450+ lines)
 - Local notifications with flutter_local_notifications
+- **Android:** POST_NOTIFICATIONS permission (Android 13+) and VIBRATE configured
+- **iOS:** Background modes and Firebase proxy settings configured
+- Comprehensive documentation: FCM_SETUP_GUIDE.md and QUICK_TEST_GUIDE.md
 
 **Commit message:**
 ```
-feat: implemented Firebase Cloud Messaging with push notifications
+feat: implemented Firebase Cloud Messaging with push notifications and platform configurations
 ```
 
 **Pull request title:**
@@ -2338,11 +2352,15 @@ exports.sendWelcomeNotification = functions.firestore
 **New Files:**
 - `lib/services/notification_service.dart` - Complete FCM service (300+ lines)
 - `lib/screens/push_notifications_demo_screen.dart` - Interactive UI (450+ lines)
+- `FCM_SETUP_GUIDE.md` - Comprehensive FCM setup and testing guide
+- `QUICK_TEST_GUIDE.md` - Quick 5-minute testing instructions
 
 **Modified Files:**
 - `pubspec.yaml` - Added firebase_messaging: ^15.0.0, flutter_local_notifications: ^17.0.0
 - `lib/main.dart` - Initialize NotificationService, added route and navigation
-- `README.md` - Comprehensive Push Notifications documentation
+- `android/app/src/main/AndroidManifest.xml` - Added POST_NOTIFICATIONS and VIBRATE permissions
+- `ios/Runner/Info.plist` - Added background modes and Firebase proxy settings
+- `README.md` - Comprehensive Push Notifications documentation with guide references
 
 ### 🎓 Learning Outcomes
 
@@ -2375,6 +2393,76 @@ FCM uses a pub-sub model where each device registers for a unique token. Firebas
 - [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
 - [Android 13 Notification Changes](https://developer.android.com/develop/ui/views/notifications/notification-permission)
 - [iOS Push Notification Guide](https://firebase.google.com/docs/cloud-messaging/ios/client)
+
+### 📖 Detailed Implementation Guides
+
+For comprehensive setup and testing instructions, see:
+
+- **[FCM_SETUP_GUIDE.md](FCM_SETUP_GUIDE.md)** - Complete Firebase Cloud Messaging setup guide
+  - Detailed implementation overview
+  - Testing methods (Firebase Console, Admin SDK, HTTP API)
+  - Platform-specific configurations (Android & iOS)
+  - Troubleshooting for common issues
+  - Security best practices
+  - Production deployment checklist
+
+- **[QUICK_TEST_GUIDE.md](QUICK_TEST_GUIDE.md)** - Quick 5-minute testing guide
+  - Fast setup instructions
+  - Step-by-step test checklist
+  - Requirements for Android and iOS
+  - Quick troubleshooting tips
+
+### 🔧 Latest Platform Configurations (Updated)
+
+**Android (`android/app/src/main/AndroidManifest.xml`):**
+```xml
+<!-- Push Notification permissions for Android 13+ (API 33+) -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+<!-- Optional: for vibration -->
+<uses-permission android:name="android.permission.VIBRATE"/>
+```
+
+**iOS (`ios/Runner/Info.plist`):**
+```xml
+<!-- Firebase Push Notifications -->
+<key>FirebaseAppDelegateProxyEnabled</key>
+<false/>
+
+<!-- Notification permissions -->
+<key>UIBackgroundModes</key>
+<array>
+    <string>remote-notification</string>
+    <string>fetch</string>
+</array>
+```
+
+### ✅ Implementation Status
+
+- ✅ NotificationService implementation complete
+- ✅ All three app states handled (foreground, background, terminated)
+- ✅ Android notification permissions configured
+- ✅ iOS background modes and Firebase settings configured
+- ✅ Push Notifications Demo UI implemented
+- ✅ Topic subscription/unsubscription functionality
+- ✅ Device token management and display
+- ✅ Real-time notification feed
+- ✅ Comprehensive documentation and guides created
+
+### 🎯 Quick Start Testing
+
+```bash
+# 1. Run the app
+flutter run
+
+# 2. Navigate to "Push Notifications" screen
+# 3. Copy the FCM device token
+# 4. Open Firebase Console → Messaging
+# 5. Send test message with your token
+# 6. Verify notification appears!
+```
+
+For detailed testing instructions, refer to [QUICK_TEST_GUIDE.md](QUICK_TEST_GUIDE.md).
 
 ---
 
@@ -3026,6 +3114,411 @@ Security rules provide:
 - [Common Security Rules Patterns](https://firebase.google.com/docs/firestore/security/rules-conditions)
 - [Testing Security Rules](https://firebase.google.com/docs/rules/unit-tests)
 - [Firebase Security Best Practices](https://firebase.google.com/support/guides/security-checklist)
+
+---
+
+## 🗺️ Google Maps SDK Integration
+
+### ✨ Features Implemented
+- ✅ **Interactive Google Maps**: Pan, zoom, and explore with native map controls
+- ✅ **User Location Tracking**: Real-time GPS positioning with permission handling
+- ✅ **Custom Markers**: Multiple marker types with color coding and info windows
+- ✅ **Map Type Switching**: Toggle between Normal, Satellite, and Terrain views
+- ✅ **Tap-to-Add Markers**: Drop custom pins anywhere on the map
+- ✅ **Quick Navigation**: Jump to famous Indian landmarks with one tap
+- ✅ **Location Permissions**: Android and iOS permission management
+
+### 🔥 Technical Implementation
+
+#### **Google Maps Flutter Package**
+```yaml
+dependencies:
+  google_maps_flutter: ^2.5.0
+  geolocator: ^10.1.0
+  location: ^5.0.0
+```
+
+#### **Platform Configuration**
+
+**Android (AndroidManifest.xml):**
+```xml
+<!-- Location permissions -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+<!-- Google Maps API Key -->
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE"/>
+```
+
+**iOS (AppDelegate.swift):**
+```swift
+import GoogleMaps
+
+override func application(...) -> Bool {
+    GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY_HERE")
+    // ...
+}
+```
+
+**iOS (Info.plist):**
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app requires location access to display your position on the map.</string>
+```
+
+#### **1. Interactive Map Display**
+```dart
+GoogleMap(
+  initialCameraPosition: CameraPosition(
+    target: LatLng(28.6139, 77.2090), // New Delhi
+    zoom: 12,
+  ),
+  mapType: _currentMapType,
+  markers: _markers,
+  onMapCreated: (controller) => _mapController = controller,
+  myLocationEnabled: true,
+  onTap: (position) => _addCustomMarker(position),
+)
+```
+
+**Features:**
+- Interactive camera controls (pan, zoom, tilt)
+- Multiple map layers (Normal, Satellite, Terrain)
+- Smooth animations when navigating
+- Tap gestures to add markers
+
+#### **2. User Location Tracking**
+```dart
+Future<void> _getCurrentLocation() async {
+  // Check and request location permissions
+  final hasPermission = await _checkLocationPermission();
+  if (!hasPermission) return;
+
+  // Get current position
+  final position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.high,
+  );
+
+  // Animate camera to user's location
+  _mapController?.animateCamera(
+    CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(position.latitude, position.longitude),
+        zoom: 15,
+      ),
+    ),
+  );
+}
+```
+
+**Permission Handling:**
+- Checks if location services are enabled
+- Requests runtime permissions (Android 6+, iOS always)
+- Handles permission denials gracefully
+- Shows user-friendly error messages
+
+#### **3. Custom Markers**
+```dart
+// Pre-configured landmarks
+final locations = [
+  {'name': 'India Gate', 'location': LatLng(28.6129, 77.2295)},
+  {'name': 'Qutub Minar', 'location': LatLng(28.5244, 77.1855)},
+  {'name': 'Red Fort', 'location': LatLng(28.6562, 77.2410)},
+  // ... more locations
+];
+
+// Create markers
+Marker(
+  markerId: MarkerId('india_gate'),
+  position: LatLng(28.6129, 77.2295),
+  infoWindow: InfoWindow(
+    title: 'India Gate',
+    snippet: 'Historic war memorial in New Delhi',
+  ),
+  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+)
+```
+
+**Marker Color Coding:**
+- 🔴 **Red Markers**: Famous landmarks (India Gate, Qutub Minar, etc.)
+- 🔵 **Blue Marker**: Your current location
+- 🟢 **Green Markers**: Custom markers added by tapping the map
+
+#### **4. Map Type Switching**
+```dart
+void _toggleMapType() {
+  setState(() {
+    _currentMapType = _currentMapType == MapType.normal
+        ? MapType.satellite
+        : _currentMapType == MapType.satellite
+            ? MapType.terrain
+            : MapType.normal;
+  });
+}
+```
+
+**Available Map Types:**
+- **Normal**: Default street view with labels
+- **Satellite**: Aerial imagery from satellites
+- **Terrain**: Topographic view showing elevation
+
+#### **5. Quick Navigation to Landmarks**
+```dart
+void _moveToLocation(LatLng location, String name) {
+  _mapController?.animateCamera(
+    CameraUpdate.newCameraPosition(
+      CameraPosition(target: location, zoom: 15),
+    ),
+  );
+}
+```
+
+**Pre-configured Locations:**
+- India Gate
+- Qutub Minar
+- Red Fort
+- Lotus Temple
+- Humayun's Tomb
+
+Tap the location buttons at the bottom to instantly navigate to these places.
+
+### 📱 Demo Screen Features
+
+**Screen:** `lib/screens/google_maps_demo_screen.dart`
+
+**UI Components:**
+1. **Interactive Map View**
+   - Full-screen map with gesture controls
+   - Real-time map type indicator
+   - Custom location button (bottom-right)
+
+2. **Quick Location Buttons**
+   - Horizontal scrollable row
+   - One-tap navigation to famous places
+   - Visual button feedback
+
+3. **Statistics Dashboard**
+   - Total markers count
+   - Current map type display
+   - GPS status (Active/Inactive)
+
+4. **Info Dialog**
+   - Feature explanations
+   - Marker color guide
+   - Control instructions
+
+### 🚀 Getting Started with Google Maps
+
+#### **Step 1: Get Google Maps API Key**
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create or select a project
+3. Enable these APIs:
+   - **Maps SDK for Android** ⚠️ REQUIRED
+   - **Maps SDK for iOS** ⚠️ REQUIRED
+4. Create credentials → API key
+5. Copy your API key
+
+#### **Step 2: Configure Your App**
+
+**Android:**
+- Edit `android/app/src/main/AndroidManifest.xml`
+- Replace `YOUR_GOOGLE_MAPS_API_KEY_HERE` with your API key
+
+**iOS:**
+- Edit `ios/Runner/AppDelegate.swift`
+- Replace `YOUR_GOOGLE_MAPS_API_KEY_HERE` with your API key
+
+#### **Step 3: Run and Test**
+
+```bash
+# Install dependencies (already done)
+flutter pub get
+
+# Run the app
+flutter run
+
+# Navigate to "Google Maps" from home screen
+```
+
+### 🎯 Testing Checklist
+
+Test all features to ensure everything works:
+
+- [ ] **Map Loads**: Map displays correctly with default location
+- [ ] **Pan & Zoom**: Can move and zoom the map smoothly
+- [ ] **Location Button**: Taps location button and map moves to current position
+- [ ] **Permissions**: Location permission prompt appears and works
+- [ ] **Markers Visible**: Red markers appear at landmark locations
+- [ ] **Tap to Add**: Tap on map creates green marker
+- [ ] **Map Types**: Toggle between Normal, Satellite, Terrain
+- [ ] **Quick Navigation**: Location buttons move camera to landmarks
+- [ ] **Info Windows**: Tap markers to see title and description
+- [ ] **Stats Update**: Bottom dashboard shows correct marker count and status
+
+### 🐛 Common Issues & Solutions
+
+#### **Issue 1: Blank Map (Gray Screen)**
+**Cause:** Missing or invalid API key
+
+**Solutions:**
+1. Verify API key is correct in both Android and iOS files
+2. Enable "Maps SDK for Android" and "Maps SDK for iOS" in Google Cloud Console
+3. Enable billing in Google Cloud (required even for free tier)
+4. Wait 5-10 minutes for API activation
+
+#### **Issue 2: "For Development Purposes Only" Watermark**
+**Cause:** API key restrictions or billing not enabled
+
+**Solutions:**
+1. Enable billing in Google Cloud Console
+2. Add SHA-1 fingerprint to API key restrictions (Android)
+3. Add Bundle ID to API key restrictions (iOS)
+4. Or remove all restrictions for testing
+
+#### **Issue 3: Location Not Working**
+**Cause:** Permissions not granted or location services disabled
+
+**Solutions:**
+1. Check AndroidManifest.xml has location permissions ✅ (Already added)
+2. Check Info.plist has location descriptions ✅ (Already added)
+3. Enable location services in device settings
+4. Grant permission when prompted
+5. Test on physical device (emulator location may be unreliable)
+
+#### **Issue 4: iOS Build Fails**
+**Error:** "Module 'GoogleMaps' not found"
+
+**Solution:**
+```bash
+cd ios
+pod deintegrate
+pod install
+cd ..
+flutter clean
+flutter pub get
+flutter run
+```
+
+### 💡 Real-World Use Cases
+
+**Implemented in LeafLine:**
+- 🗺️ **Interactive Map Exploration**: Explore Delhi's famous landmarks
+- 📍 **Location Marking**: Add custom markers by tapping the map
+- 🧭 **Navigation Aid**: Jump to specific locations quickly
+- 📱 **GPS Tracking**: Show real-time user location
+
+**Production Applications:**
+- 🚗 **Ride Sharing**: Track driver location (Uber, Lyft, Ola)
+- 🍔 **Food Delivery**: Real-time delivery tracking (Swiggy, Zomato, DoorDash)
+- 🏠 **Real Estate**: Property location visualization (Zillow, Housing.com)
+- 🏪 **Store Locator**: Find nearby stores (Starbucks, McDonald's)
+- 🚴 **Fitness Tracking**: Route tracking and geofencing (Strava, Nike Run Club)
+- 📦 **Package Tracking**: Delivery route visualization (Amazon, FedEx)
+- 🏨 **Travel Apps**: Hotel and attraction mapping (Airbnb, TripAdvisor)
+- 🚌 **Public Transport**: Bus/train tracking (Google Maps, Citymapper)
+
+### 📊 API Usage & Pricing
+
+**Free Tier (Monthly):**
+- $200 free credit
+- ~28,500 map loads for free
+- Beyond that: ~$0.007 per map load
+
+**Best Practices to Reduce Costs:**
+1. ✅ Enable billing with budget alerts
+2. ✅ Cache map tiles when possible
+3. ✅ Restrict API keys to prevent abuse
+4. ✅ Monitor usage in Google Cloud Console
+
+### 📁 Files Created/Modified
+
+**New Files:**
+- `lib/screens/google_maps_demo_screen.dart` - Interactive map UI (550+ lines)
+- `GOOGLE_MAPS_SETUP_GUIDE.md` - Comprehensive setup guide
+- `GOOGLE_MAPS_QUICK_START.md` - Quick 10-minute start guide
+
+**Modified Files:**
+- `pubspec.yaml` - Added google_maps_flutter, geolocator, location packages
+- `android/app/src/main/AndroidManifest.xml` - Added location permissions and API key metadata
+- `ios/Runner/AppDelegate.swift` - Added GoogleMaps import and API key
+- `ios/Runner/Info.plist` - Added location permission descriptions
+- `lib/main.dart` - Added route and navigation button for maps demo
+- `README.md` - Comprehensive Google Maps documentation
+
+### 📚 Resources
+
+- [Google Maps Flutter Package](https://pub.dev/packages/google_maps_flutter)
+- [Google Maps Platform Documentation](https://developers.google.com/maps)
+- [Geolocator Package](https://pub.dev/packages/geolocator)
+- [Google Cloud Console](https://console.cloud.google.com)
+- [GOOGLE_MAPS_SETUP_GUIDE.md](GOOGLE_MAPS_SETUP_GUIDE.md) - Comprehensive setup and troubleshooting guide
+- [GOOGLE_MAPS_QUICK_START.md](GOOGLE_MAPS_QUICK_START.md) - Get started in 10 minutes
+
+---
+
+## 🆕 Latest Updates
+
+### Google Maps Integration - February 9, 2026
+
+Complete Google Maps SDK integration with interactive maps, user location, and custom markers:
+
+**✨ What's New:**
+- ✅ **Google Maps SDK**: Integrated google_maps_flutter with full platform configuration
+- ✅ **Interactive Maps**: Pan, zoom, tap-to-add markers, multiple map types
+- ✅ **User Location**: Real-time GPS tracking with geolocator package
+- ✅ **Custom Markers**: Pre-configured landmarks and tap-to-add custom pins
+- ✅ **Platform Setup**: Android and iOS configurations with API key placeholders
+- ✅ **Comprehensive Guide**: GOOGLE_MAPS_SETUP_GUIDE.md with step-by-step instructions
+- ✅ **Demo Screen**: Beautiful UI with stats dashboard and quick navigation
+
+**🎯 Quick Start:**
+```bash
+# 1. Get Google Maps API key from console.cloud.google.com
+# 2. Add to AndroidManifest.xml and AppDelegate.swift
+# 3. Run: flutter run
+# 4. Navigate to "Google Maps" from home screen
+```
+
+**📖 Documentation:**
+- Complete setup guide in GOOGLE_MAPS_SETUP_GUIDE.md
+- Quick 10-minute start guide in GOOGLE_MAPS_QUICK_START.md
+- API key acquisition instructions
+- Platform-specific configurations
+- Troubleshooting for common issues
+- Real-world use cases and examples
+
+---
+
+### Firebase Cloud Messaging (FCM) - February 9, 2026
+
+The Firebase Cloud Messaging implementation has been enhanced with comprehensive platform configurations and documentation:
+
+**✨ What's New:**
+- ✅ **Android 13+ Support**: Added `POST_NOTIFICATIONS` permission for Android 13+ (API 33)
+- ✅ **iOS Background Modes**: Configured remote-notification support in Info.plist
+- ✅ **Comprehensive Guides**: Added detailed setup and testing documentation
+  - [FCM_SETUP_GUIDE.md](FCM_SETUP_GUIDE.md) - Complete implementation guide with troubleshooting
+  - [QUICK_TEST_GUIDE.md](QUICK_TEST_GUIDE.md) - 5-minute quick start guide
+- ✅ **Production Ready**: All platform configurations verified and tested
+
+**📱 Platform Configurations:**
+- Android: `POST_NOTIFICATIONS` and `VIBRATE` permissions in AndroidManifest.xml
+- iOS: Background modes and Firebase proxy settings in Info.plist
+
+**🚀 Quick Test:**
+```bash
+flutter run
+# Navigate to "Push Notifications" → Copy token → Test in Firebase Console
+```
+
+**📖 Documentation:**
+- Complete FCM implementation details in main README
+- Step-by-step testing guide in QUICK_TEST_GUIDE.md
+- Comprehensive troubleshooting in FCM_SETUP_GUIDE.md
+- Platform-specific setup instructions for Android and iOS
 
 ---
 
