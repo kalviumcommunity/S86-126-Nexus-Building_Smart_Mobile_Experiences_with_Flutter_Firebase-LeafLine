@@ -59,11 +59,13 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 ### 7. Google Maps Integration 🗺️
 - **Interactive Maps**: Pan, zoom, and tap-to-add markers with Google Maps SDK
 - **User Location**: Real-time GPS tracking with permission handling
+- **Live Location Tracking**: Continuous position stream with camera following (updates every 10m)
 - **Custom Markers**: Red (landmarks), Blue (current location), Green (custom pins)
+- **Custom Marker Icons**: Support for custom PNG icons with automatic fallback
 - **Multiple Map Types**: Normal, Satellite, and Terrain views
 - **Quick Navigation**: Pre-configured locations (India Gate, Qutub Minar, Red Fort, etc.)
 - **Location Permissions**: Android and iOS permission management with geolocator
-- **Comprehensive Guides**: GOOGLE_MAPS_SETUP_GUIDE.md (detailed) and GOOGLE_MAPS_QUICK_START.md (10-min)
+- **Comprehensive Guides**: GOOGLE_MAPS_SETUP_GUIDE.md, GOOGLE_MAPS_QUICK_START.md, USER_LOCATION_MARKERS_GUIDE.md
 
 ### 8. Firebase Authentication
 - User registration and login
@@ -3122,7 +3124,9 @@ Security rules provide:
 ### ✨ Features Implemented
 - ✅ **Interactive Google Maps**: Pan, zoom, and explore with native map controls
 - ✅ **User Location Tracking**: Real-time GPS positioning with permission handling
+- ✅ **Live Location Tracking**: Continuous position stream with camera following (10m updates)
 - ✅ **Custom Markers**: Multiple marker types with color coding and info windows
+- ✅ **Custom Marker Icons**: Support for custom PNG icons with automatic fallback
 - ✅ **Map Type Switching**: Toggle between Normal, Satellite, and Terrain views
 - ✅ **Tap-to-Add Markers**: Drop custom pins anywhere on the map
 - ✅ **Quick Navigation**: Jump to famous Indian landmarks with one tap
@@ -3219,7 +3223,50 @@ Future<void> _getCurrentLocation() async {
 - Handles permission denials gracefully
 - Shows user-friendly error messages
 
-#### **3. Custom Markers**
+#### **3. Live Location Tracking**
+```dart
+void _toggleLiveTracking() async {
+  if (_isLiveTrackingEnabled) {
+    // Stop tracking
+    _positionStreamSubscription?.cancel();
+    setState(() => _isLiveTrackingEnabled = false);
+    return;
+  }
+
+  // Start continuous position stream
+  const locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10, // Update every 10 meters
+  );
+
+  _positionStreamSubscription = Geolocator.getPositionStream(
+    locationSettings: locationSettings,
+  ).listen((Position position) {
+    setState(() {
+      _currentPosition = position;
+      _addCurrentLocationMarker(position);
+    });
+
+    // Animate camera to follow user
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(position.latitude, position.longitude),
+      ),
+    );
+  });
+
+  setState(() => _isLiveTrackingEnabled = true);
+}
+```
+
+**Live Tracking Features:**
+- 📍 **Continuous Updates**: Position stream updates every 10 meters
+- 📷 **Auto Camera Follow**: Map automatically pans to follow your movement
+- 🔋 **Battery Optimized**: Distance filter reduces unnecessary GPS queries
+- 🎯 **Real-time Marker**: Blue marker updates as you move
+- ⏸️ **Toggle Control**: Start/stop tracking with navigation button
+
+#### **4. Custom Markers**
 ```dart
 // Pre-configured landmarks
 final locations = [
@@ -3246,7 +3293,29 @@ Marker(
 - 🔵 **Blue Marker**: Your current location
 - 🟢 **Green Markers**: Custom markers added by tapping the map
 
-#### **4. Map Type Switching**
+#### **5. Custom Marker Icons**
+```dart
+Future<void> _loadCustomMarkerIcon() async {
+  try {
+    final icon = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(48, 48)),
+      'assets/icons/location_pin.png',
+    );
+    setState(() => _customMarkerIcon = icon);
+  } catch (e) {
+    // Fallback to default marker if custom icon fails
+    _customMarkerIcon = BitmapDescriptor.defaultMarker;
+  }
+}
+```
+
+**Custom Icon Features:**
+- 🎨 **PNG Support**: Load custom marker icons from assets
+- 📐 **Size Control**: Configure icon size (recommended: 48x48 or 64x64)
+- 🛡️ **Graceful Fallback**: Default marker if custom icon loading fails
+- 🗂️ **Asset Path**: `assets/icons/location_pin.png`
+
+#### **6. Map Type Switching**
 ```dart
 void _toggleMapType() {
   setState(() {
@@ -3264,7 +3333,7 @@ void _toggleMapType() {
 - **Satellite**: Aerial imagery from satellites
 - **Terrain**: Topographic view showing elevation
 
-#### **5. Quick Navigation to Landmarks**
+#### **7. Quick Navigation to Landmarks**
 ```dart
 void _moveToLocation(LatLng location, String name) {
   _mapController?.animateCamera(
@@ -3292,7 +3361,9 @@ Tap the location buttons at the bottom to instantly navigate to these places.
 1. **Interactive Map View**
    - Full-screen map with gesture controls
    - Real-time map type indicator
-   - Custom location button (bottom-right)
+   - Two floating action buttons:
+     - 🧭 **Navigation Button** (top-right): Toggle live location tracking
+     - 📍 **Location Button** (bottom-right): Get current location once
 
 2. **Quick Location Buttons**
    - Horizontal scrollable row
@@ -3302,7 +3373,7 @@ Tap the location buttons at the bottom to instantly navigate to these places.
 3. **Statistics Dashboard**
    - Total markers count
    - Current map type display
-   - GPS status (Active/Inactive)
+   - GPS status (Active/Inactive/Following)
 
 4. **Info Dialog**
    - Feature explanations
@@ -3349,14 +3420,18 @@ Test all features to ensure everything works:
 
 - [ ] **Map Loads**: Map displays correctly with default location
 - [ ] **Pan & Zoom**: Can move and zoom the map smoothly
-- [ ] **Location Button**: Taps location button and map moves to current position
+- [ ] **Location Button**: Tap location button and map moves to current position
+- [ ] **Live Tracking**: Tap navigation button to enable continuous location tracking
+- [ ] **Auto Follow**: Camera follows your movement when live tracking is enabled
+- [ ] **Stop Tracking**: Tap navigation button again to disable live tracking
 - [ ] **Permissions**: Location permission prompt appears and works
 - [ ] **Markers Visible**: Red markers appear at landmark locations
 - [ ] **Tap to Add**: Tap on map creates green marker
+- [ ] **Custom Icons**: Custom marker icon loads (or defaults to standard marker)
 - [ ] **Map Types**: Toggle between Normal, Satellite, Terrain
 - [ ] **Quick Navigation**: Location buttons move camera to landmarks
 - [ ] **Info Windows**: Tap markers to see title and description
-- [ ] **Stats Update**: Bottom dashboard shows correct marker count and status
+- [ ] **Stats Update**: Bottom dashboard shows correct marker count, map type, and "Following" status
 
 ### 🐛 Common Issues & Solutions
 
@@ -3408,14 +3483,16 @@ flutter run
 - 🗺️ **Interactive Map Exploration**: Explore Delhi's famous landmarks
 - 📍 **Location Marking**: Add custom markers by tapping the map
 - 🧭 **Navigation Aid**: Jump to specific locations quickly
-- 📱 **GPS Tracking**: Show real-time user location
+- 📱 **GPS Tracking**: Show real-time user location with one-time position
+- 🔵 **Live Tracking**: Continuous position stream with auto-follow camera
+- 🎨 **Custom Marker Icons**: Load custom PNG icons from assets
 
 **Production Applications:**
-- 🚗 **Ride Sharing**: Track driver location (Uber, Lyft, Ola)
-- 🍔 **Food Delivery**: Real-time delivery tracking (Swiggy, Zomato, DoorDash)
+- 🚗 **Ride Sharing**: Track driver location with live updates (Uber, Lyft, Ola)
+- 🍔 **Food Delivery**: Real-time delivery tracking with moving markers (Swiggy, Zomato, DoorDash)
 - 🏠 **Real Estate**: Property location visualization (Zillow, Housing.com)
 - 🏪 **Store Locator**: Find nearby stores (Starbucks, McDonald's)
-- 🚴 **Fitness Tracking**: Route tracking and geofencing (Strava, Nike Run Club)
+- 🚴 **Fitness Tracking**: Route tracking and geofencing with live position (Strava, Nike Run Club)
 - 📦 **Package Tracking**: Delivery route visualization (Amazon, FedEx)
 - 🏨 **Travel Apps**: Hotel and attraction mapping (Airbnb, TripAdvisor)
 - 🚌 **Public Transport**: Bus/train tracking (Google Maps, Citymapper)
@@ -3436,9 +3513,10 @@ flutter run
 ### 📁 Files Created/Modified
 
 **New Files:**
-- `lib/screens/google_maps_demo_screen.dart` - Interactive map UI (550+ lines)
+- `lib/screens/google_maps_demo_screen.dart` - Interactive map UI with live tracking (620+ lines)
 - `GOOGLE_MAPS_SETUP_GUIDE.md` - Comprehensive setup guide
 - `GOOGLE_MAPS_QUICK_START.md` - Quick 10-minute start guide
+- `USER_LOCATION_MARKERS_GUIDE.md` - User location tracking and custom markers guide
 
 **Modified Files:**
 - `pubspec.yaml` - Added google_maps_flutter, geolocator, location packages
@@ -3456,6 +3534,7 @@ flutter run
 - [Google Cloud Console](https://console.cloud.google.com)
 - [GOOGLE_MAPS_SETUP_GUIDE.md](GOOGLE_MAPS_SETUP_GUIDE.md) - Comprehensive setup and troubleshooting guide
 - [GOOGLE_MAPS_QUICK_START.md](GOOGLE_MAPS_QUICK_START.md) - Get started in 10 minutes
+- [USER_LOCATION_MARKERS_GUIDE.md](USER_LOCATION_MARKERS_GUIDE.md) - User location tracking and custom markers guide
 
 ---
 
@@ -3463,27 +3542,32 @@ flutter run
 
 ### Google Maps Integration - February 9, 2026
 
-Complete Google Maps SDK integration with interactive maps, user location, and custom markers:
+Complete Google Maps SDK integration with interactive maps, live location tracking, and custom markers:
 
 **✨ What's New:**
 - ✅ **Google Maps SDK**: Integrated google_maps_flutter with full platform configuration
 - ✅ **Interactive Maps**: Pan, zoom, tap-to-add markers, multiple map types
 - ✅ **User Location**: Real-time GPS tracking with geolocator package
+- ✅ **Live Tracking**: Continuous position stream with auto-follow camera (10m updates)
+- ✅ **Custom Marker Icons**: Support for custom PNG icons from assets with fallback
 - ✅ **Custom Markers**: Pre-configured landmarks and tap-to-add custom pins
 - ✅ **Platform Setup**: Android and iOS configurations with API key placeholders
-- ✅ **Comprehensive Guide**: GOOGLE_MAPS_SETUP_GUIDE.md with step-by-step instructions
-- ✅ **Demo Screen**: Beautiful UI with stats dashboard and quick navigation
+- ✅ **Comprehensive Guides**: Three detailed guides for setup, quick start, and location features
+- ✅ **Demo Screen**: Beautiful UI with dual floating buttons, stats dashboard, and quick navigation
 
 **🎯 Quick Start:**
 ```bash
 # 1. Get Google Maps API key from console.cloud.google.com
 # 2. Add to AndroidManifest.xml and AppDelegate.swift
-# 3. Run: flutter run
-# 4. Navigate to "Google Maps" from home screen
+# 3. (Optional) Add custom marker: assets/icons/location_pin.png
+# 4. Run: flutter run
+# 5. Navigate to "Google Maps" from home screen
 ```
 
 **📖 Documentation:**
 - Complete setup guide in GOOGLE_MAPS_SETUP_GUIDE.md
+- Quick start guide in GOOGLE_MAPS_QUICK_START.md
+- Location & markers guide in USER_LOCATION_MARKERS_GUIDE.md
 - Quick 10-minute start guide in GOOGLE_MAPS_QUICK_START.md
 - API key acquisition instructions
 - Platform-specific configurations
