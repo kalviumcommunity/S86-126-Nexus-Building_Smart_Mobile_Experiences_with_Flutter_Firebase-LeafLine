@@ -29,6 +29,13 @@ dependencies:
   
   # Local notifications for displaying FCM messages
   flutter_local_notifications: ^17.0.0
+  
+  # Google Maps integration
+  google_maps_flutter: ^2.5.0
+  
+  # Location services
+  location: ^5.0.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:

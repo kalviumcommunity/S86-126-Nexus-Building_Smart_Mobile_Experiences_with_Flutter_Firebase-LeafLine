@@ -45,5 +45,21 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Firebase Push Notifications -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
+	<!-- Notification permissions -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
+	<!-- Location permissions for Google Maps -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires location access to display your position on the map.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app requires location access for enhanced map features.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires location access to display your position on the map.</string>
 </dict>
 </plist>
