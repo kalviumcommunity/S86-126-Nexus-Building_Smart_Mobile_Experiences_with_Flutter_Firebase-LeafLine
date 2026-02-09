@@ -25,6 +25,11 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
   Position? _currentPosition;
   bool _isLoadingLocation = false;
   MapType _currentMapType = MapType.normal;
+  
+  // Live location tracking
+  StreamSubscription<Position>? _positionStreamSubscription;
+  bool _isLiveTrackingEnabled = false;
+  BitmapDescriptor? _customMarkerIcon;
 
   // Default camera position (India - New Delhi)
   static const CameraPosition _initialPosition = CameraPosition(
@@ -65,12 +70,30 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
   void initState() {
     super.initState();
     _addSampleMarkers();
+    _loadCustomMarkerIcon();
   }
 
   @override
   void dispose() {
+    _positionStreamSubscription?.cancel();
     _mapController?.dispose();
     super.dispose();
+  }
+
+  /// Load custom marker icon (optional - will use default if not available)
+  Future<void> _loadCustomMarkerIcon() async {
+    try {
+      // Try to load custom icon from assets
+      // If the icon doesn't exist, this will fail silently and use default markers
+      _customMarkerIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(48, 48)),
+        'assets/icons/location_pin.png',
+      );
+      setState(() {});
+    } catch (e) {
+      // Custom icon not found - will use default colored markers
+      debugPrint('Custom marker icon not found, using default markers');
+    }
   }
 
   /// Add sample markers to the map
@@ -147,19 +170,7 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
       });
 
       // Add marker for current location
-      _markers.add(
-        Marker(
-          markerId: const MarkerId('current_location'),
-          position: LatLng(position.latitude, position.longitude),
-          infoWindow: const InfoWindow(
-            title: 'Your Location',
-            snippet: 'You are here',
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue,
-          ),
-        ),
-      );
+      _addCurrentLocationMarker(position);
 
       // Move camera to current location
       _mapController?.animateCamera(
@@ -192,6 +203,74 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
       ),
     );
     _showSnackBar('Moving to $name');
+  }
+
+  /// Add or update current location marker
+  void _addCurrentLocationMarker(Position position) {
+    // Remove existing current location marker
+    _markers.removeWhere((marker) => marker.markerId.value == 'current_location');
+    
+    // Add new marker with custom icon if available
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('current_location'),
+        position: LatLng(position.latitude, position.longitude),
+        infoWindow: InfoWindow(
+          title: 'Your Location',
+          snippet: 'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}',
+        ),
+        icon: _customMarkerIcon ?? BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueBlue,
+        ),
+      ),
+    );
+  }
+
+  /// Toggle live location tracking
+  void _toggleLiveTracking() async {
+    if (_isLiveTrackingEnabled) {
+      // Stop live tracking
+      _positionStreamSubscription?.cancel();
+      setState(() {
+        _isLiveTrackingEnabled = false;
+      });
+      _showSnackBar('Live tracking stopped');
+    } else {
+      // Start live tracking
+      final hasPermission = await _checkLocationPermission();
+      if (!hasPermission) return;
+
+      setState(() {
+        _isLiveTrackingEnabled = true;
+      });
+
+      // Listen to position stream
+      const locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // Update every 10 meters
+      );
+
+      _positionStreamSubscription = Geolocator.getPositionStream(
+        locationSettings: locationSettings,
+      ).listen((Position position) {
+        setState(() {
+          _currentPosition = position;
+          _addCurrentLocationMarker(position);
+        });
+
+        // Optionally move camera to follow user
+        _mapController?.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(position.latitude, position.longitude),
+              zoom: 15,
+            ),
+          ),
+        );
+      });
+
+      _showSnackBar('Live tracking enabled - Following your location');
+    }
   }
 
   /// Toggle map type
@@ -286,16 +365,40 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
                 Positioned(
                   bottom: 16,
                   right: 16,
-                  child: FloatingActionButton(
-                    onPressed: _isLoadingLocation ? null : _getCurrentLocation,
-                    backgroundColor: Colors.white,
-                    child: _isLoadingLocation
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(Icons.my_location, color: Colors.teal[700]),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Live tracking toggle button
+                      FloatingActionButton(
+                        heroTag: 'liveTrack',
+                        onPressed: _toggleLiveTracking,
+                        backgroundColor: _isLiveTrackingEnabled 
+                            ? Colors.red 
+                            : Colors.white,
+                        child: Icon(
+                          _isLiveTrackingEnabled 
+                              ? Icons.stop 
+                              : Icons.navigation,
+                          color: _isLiveTrackingEnabled 
+                              ? Colors.white 
+                              : Colors.teal[700],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Get current location button
+                      FloatingActionButton(
+                        heroTag: 'getLocation',
+                        onPressed: _isLoadingLocation ? null : _getCurrentLocation,
+                        backgroundColor: Colors.white,
+                        child: _isLoadingLocation
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Icon(Icons.my_location, color: Colors.teal[700]),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -397,9 +500,13 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
                           : 'Terrain',
                 ),
                 _buildStatItem(
-                  Icons.location_on,
-                  'GPS',
-                  _currentPosition != null ? 'Active' : 'Inactive',
+                  _isLiveTrackingEnabled ? Icons.navigation : Icons.location_on,
+                  _isLiveTrackingEnabled ? 'Live Track' : 'GPS',
+                  _isLiveTrackingEnabled 
+                      ? 'Following' 
+                      : _currentPosition != null 
+                          ? 'Active' 
+                          : 'Inactive',
                 ),
               ],
             ),
@@ -497,9 +604,19 @@ class _GoogleMapsDemoScreenState extends State<GoogleMapsDemoScreen> {
                 '📱 Controls',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text('• Location button: Find your position'),
+              Text('• Navigation button: Live tracking (follows you)'),
+              Text('• Location button: Find your position once'),
               Text('• Quick buttons: Jump to famous places'),
               Text('• Map type: Toggle between views'),
+              SizedBox(height: 12),
+              Text(
+                '🔴 Live Tracking',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text('• Tap navigation button to start'),
+              Text('• Updates every 10 meters'),
+              Text('• Camera follows your movement'),
+              Text('• Tap again (stop) to disable'),
             ],
           ),
         ),
