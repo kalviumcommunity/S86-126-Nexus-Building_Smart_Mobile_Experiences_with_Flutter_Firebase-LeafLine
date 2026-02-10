@@ -22,6 +22,8 @@ import 'screens/firestore_security_demo_screen.dart';
 import 'screens/google_maps_demo_screen.dart';
 import 'screens/crud_demo_screen.dart';
 import 'screens/provider_crud_screen.dart';
+import 'screens/forms_validation_demo.dart';
+import 'screens/multi_step_form_demo.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -74,6 +76,8 @@ class MyApp extends StatelessWidget {
           '/googleMaps': (context) => const GoogleMapsDemoScreen(),
           '/crudDemo': (context) => const CrudDemoScreen(),
           '/providerCrud': (context) => const ProviderCrudScreen(),
+          '/formsValidation': (context) => const FormsValidationDemo(),
+          '/multiStepForm': (context) => const MultiStepFormDemo(),
         },
       ),
     );
@@ -993,6 +997,101 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       vertical: 12,
                                     ),
                                   ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Forms Validation Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.orange.shade600,
+                                  Colors.deepOrange.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.check_box, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '📋 Forms & Validation',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Complex Form Validation Examples',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const FormsValidationDemo(),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.edit_note, size: 20),
+                                      label: const Text('Validation Demo'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.orange,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const MultiStepFormDemo(),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(Icons.stairs, size: 20),
+                                      label: const Text('Multi-Step Form'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.deepOrange,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 10,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
