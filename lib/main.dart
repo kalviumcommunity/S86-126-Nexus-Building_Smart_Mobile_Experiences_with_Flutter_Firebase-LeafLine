@@ -24,6 +24,11 @@ import 'screens/crud_demo_screen.dart';
 import 'screens/provider_crud_screen.dart';
 import 'screens/forms_validation_demo.dart';
 import 'screens/multi_step_form_demo.dart';
+import 'screens/tab_navigation_demo_screen.dart';
+import 'screens/basic_tab_navigation_screen.dart';
+import 'screens/pageview_navigation_screen.dart';
+import 'screens/indexed_stack_navigation_screen.dart';
+import 'screens/material3_navigation_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -78,6 +83,11 @@ class MyApp extends StatelessWidget {
           '/providerCrud': (context) => const ProviderCrudScreen(),
           '/formsValidation': (context) => const FormsValidationDemo(),
           '/multiStepForm': (context) => const MultiStepFormDemo(),
+          '/tabNavigation': (context) => const TabNavigationDemoScreen(),
+          '/basicTabNavigation': (context) => const BasicTabNavigationScreen(),
+          '/pageViewNavigation': (context) => const PageViewNavigationScreen(),
+          '/indexedStackNavigation': (context) => const IndexedStackNavigationScreen(),
+          '/material3Navigation': (context) => const Material3NavigationScreen(),
         },
       ),
     );
@@ -1092,6 +1102,75 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       ),
                                     ),
                                   ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Tab Navigation Section
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.indigo.shade400,
+                                  Colors.blue.shade400,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.view_carousel, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '📱 Tab Navigation',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Bottom Navigation & Tab-Based UIs',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const TabNavigationDemoScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.navigation, size: 20),
+                                  label: const Text('View All Tab Demos'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.indigo,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 12,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
