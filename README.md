@@ -86,6 +86,50 @@ A comprehensive Flutter application demonstrating modern mobile development prac
 - **User-Scoped Data**: All CRUD operations tied to authenticated user
 - **Auth State Changes**: Real-time authentication state monitoring
 
+### 10. Forms & Validation 📋
+- **Comprehensive Form Validation**: Complete form validation demo with 14+ validation types
+- **Real-Time Validation**: Instant feedback as users type
+- **Multi-Field Forms**: Email, password, phone, URL, age, and bio validation
+- **Cross-Field Validation**: Password confirmation matching
+- **Input Formatters**: Auto-formatting for phone numbers, digits-only fields
+- **Custom Validators**: Reusable validation utilities library
+- **Multi-Step Forms**: Progressive registration with Stepper widget
+- **Step Validation**: Each step must pass validation before proceeding
+- **Form State Management**: GlobalKey<FormState> for form control
+- **User-Friendly Errors**: Clear, actionable error messages for each field
+- **Validation Types**:
+  - Required field validation
+  - Email format (regex pattern)
+  - Password strength (min length, uppercase, lowercase, numbers)
+  - Phone number (10-digit format with digit-only input)
+  - URL format validation
+  - Number range validation (age 13-120)
+  - Min/max length constraints
+  - Alphabetic-only validation
+  - Alphanumeric validation
+  - Dropdown selection validation
+  - Radio button/ChoiceChip validation
+  - Checkbox agreement validation
+  - Date picker validation (past dates only)
+  - Optional field validation (validates only if filled)
+- **Multi-Step Features**:
+  - 3-step registration flow (Personal Info → Account → Address)
+  - Progress indicator showing completion percentage
+  - Horizontal stepper with visual step status
+  - Step-by-step navigation with validation
+  - Back/Continue buttons with smart enabling
+  - Final submission with complete data summary
+  - Step tapping for direct navigation
+- **Best Practices**:
+  - AutovalidateMode for smart validation timing
+  - Password visibility toggles
+  - Character counters for text fields
+  - Helper text for field requirements
+  - Success dialogs with submitted data
+  - Form reset functionality
+  - Proper controller disposal
+  - Input length limiting
+
 ### 3. Scrollable Views
 - ListView and GridView implementations
 - Efficient lazy loading with builder constructors
@@ -3133,7 +3177,358 @@ Security rules provide:
 
 ---
 
-## 🗺️ Google Maps SDK Integration
+## � Forms & Validation Implementation
+
+### ✨ Features Implemented
+- ✅ **Comprehensive Form Validation**: 14+ validation types with real-time feedback
+- ✅ **Multi-Field Forms**: Email, password, phone, URL, age, and bio validation
+- ✅ **Cross-Field Validation**: Password confirmation matching
+- ✅ **Input Formatters**: Auto-formatting for phone numbers and digits-only fields
+- ✅ **Custom Validators Library**: Reusable validation utilities (`form_validators.dart`)
+- ✅ **Multi-Step Forms**: Progressive registration with Stepper widget
+- ✅ **Step Validation**: Each step must pass before proceeding
+- ✅ **User-Friendly Errors**: Clear, actionable error messages
+- ✅ **Form State Management**: GlobalKey<FormState> for complete form control
+- ✅ **Best Practices**: Auto-validation, password toggles, character counters
+
+### 🔥 Technical Implementation
+
+#### **1. Basic Form Structure**
+```dart
+final _formKey = GlobalKey<FormState>();
+
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      TextFormField(
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'This field is required';
+          }
+          return null;
+        },
+      ),
+      ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            // Form is valid, process data
+            print('Form validated successfully!');
+          }
+        },
+        child: Text('Submit'),
+      ),
+    ],
+  ),
+);
+```
+
+#### **2. Email Validation**
+```dart
+validator: FormValidators.validateEmail,
+
+// Or custom implementation:
+validator: (value) {
+  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+  if (!emailRegex.hasMatch(value ?? "")) {
+    return "Enter a valid email address";
+  }
+  return null;
+}
+```
+
+#### **3. Password Validation with Strength Requirements**
+```dart
+validator: (value) => FormValidators.validatePassword(value, minLength: 8),
+
+// Checks for:
+// - Minimum 8 characters
+// - At least one uppercase letter
+// - At least one lowercase letter
+// - At least one number
+```
+
+#### **4. Password Confirmation Cross-Field Validation**
+```dart
+final _passwordController = TextEditingController();
+
+// Password field
+TextFormField(
+  controller: _passwordController,
+  obscureText: true,
+  validator: FormValidators.validatePassword,
+),
+
+// Confirm password field
+TextFormField(
+  obscureText: true,
+  validator: (value) => FormValidators.validatePasswordConfirmation(
+    value,
+    _passwordController.text,
+  ),
+),
+```
+
+#### **5. Phone Number with Input Formatter**
+```dart
+TextFormField(
+  decoration: const InputDecoration(
+    labelText: 'Phone Number *',
+    hintText: '1234567890',
+  ),
+  keyboardType: TextInputType.phone,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(10),
+  ],
+  validator: FormValidators.validatePhoneNumber,
+)
+```
+
+#### **6. Age Validation with Number Range**
+```dart
+TextFormField(
+  keyboardType: TextInputType.number,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+    LengthLimitingTextInputFormatter(3),
+  ],
+  validator: (value) => FormValidators.validateNumberRange(
+    value,
+    13,
+    120,
+    fieldName: 'Age',
+  ),
+)
+```
+
+#### **7. Dropdown Validation**
+```dart
+DropdownButtonFormField<String>(
+  value: _selectedCountry,
+  decoration: const InputDecoration(
+    labelText: 'Country *',
+    border: OutlineInputBorder(),
+  ),
+  items: _countries.map((country) {
+    return DropdownMenuItem(
+      value: country,
+      child: Text(country),
+    );
+  }).toList(),
+  onChanged: (value) => setState(() => _selectedCountry = value),
+  validator: (value) {
+    if (value == null) {
+      return 'Please select a country';
+    }
+    return null;
+  },
+)
+```
+
+#### **8. Multi-Step Form with Stepper**
+```dart
+int _currentStep = 0;
+final _step1FormKey = GlobalKey<FormState>();
+final _step2FormKey = GlobalKey<FormState>();
+final _step3FormKey = GlobalKey<FormState>();
+
+Stepper(
+  currentStep: _currentStep,
+  onStepContinue: () {
+    bool isValid = false;
+    
+    // Validate current step
+    switch (_currentStep) {
+      case 0:
+        isValid = _step1FormKey.currentState?.validate() ?? false;
+        break;
+      case 1:
+        isValid = _step2FormKey.currentState?.validate() ?? false;
+        break;
+      case 2:
+        isValid = _step3FormKey.currentState?.validate() ?? false;
+        break;
+    }
+    
+    if (isValid) {
+      if (_currentStep < 2) {
+        setState(() => _currentStep++);
+      } else {
+        _submitForm();
+      }
+    }
+  },
+  onStepCancel: () {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+    }
+  },
+  steps: [
+    Step(
+      title: Text('Personal Info'),
+      content: Form(
+        key: _step1FormKey,
+        child: Column(
+          children: [/* Step 1 fields */],
+        ),
+      ),
+    ),
+    Step(
+      title: Text('Account'),
+      content: Form(
+        key: _step2FormKey,
+        child: Column(
+          children: [/* Step 2 fields */],
+        ),
+      ),
+    ),
+    Step(
+      title: Text('Address'),
+      content: Form(
+        key: _step3FormKey,
+        child: Column(
+          children: [/* Step 3 fields */],
+        ),
+      ),
+    ),
+  ],
+)
+```
+
+### 📚 Available Validators in `form_validators.dart`
+
+| Validator | Purpose | Example |
+|-----------|---------|---------|
+| `validateEmail` | Email format validation | user@example.com |
+| `validatePassword` | Password strength (min length, uppercase, lowercase, number) | MyPass123 |
+| `validatePasswordConfirmation` | Password matching | Matches original password |
+| `validateRequired` | Required field check | Cannot be empty |
+| `validateMinLength` | Minimum character count | Min 3 chars |
+| `validateMaxLength` | Maximum character count | Max 50 chars |
+| `validateLengthRange` | Character count range | Between 3-50 chars |
+| `validatePhoneNumber` | Phone format (10-15 digits) | 1234567890 |
+| `validateUrl` | URL format | https://example.com |
+| `validateNumber` | Valid number | 123 or 123.45 |
+| `validateInteger` | Valid integer | 123 |
+| `validateNumberRange` | Number within range | Between 13-120 |
+| `validateAlphabetic` | Letters only | John Doe |
+| `validateAlphanumeric` | Letters and numbers | User123 |
+| `validatePastDate` | Date not in future | 2000-01-01 |
+| `validateFutureDate` | Date not in past | 2030-01-01 |
+| `combine` | Combine multiple validators | Multiple rules |
+
+### 🎯 How to Test Forms Validation
+
+1. **Run the app** and navigate to "📋 Forms & Validation"
+
+2. **Test Forms Validation Demo**:
+   - Tap "📋 Forms & Validation" section
+   - Tap "Validation Demo" button
+   - Try submitting empty form → See all error messages
+   - Fill fields incorrectly:
+     - Name with numbers → "Must contain only letters"
+     - Invalid email → "Enter a valid email address"
+     - Weak password → Shows specific requirements
+     - Mismatched password confirmation → "Passwords do not match"
+     - Phone with letters → Auto-filters to digits only
+     - Age outside range → "Age must be between 13 and 120"
+   - Fill form correctly → Success dialog shows submitted data
+
+3. **Test Multi-Step Form**:
+   - Tap "Multi-Step Form" button
+   - Step 1 (Personal Info):
+     - Leave fields empty → Cannot continue
+     - Fill correctly → Continue button enabled
+     - Click Continue → Progress to Step 2
+   - Step 2 (Account Info):
+     - Test username validation (4-20 chars, alphanumeric)
+     - Test password strength requirements
+     - Test password confirmation matching
+     - Click Continue → Progress to Step 3
+   - Step 3 (Address):
+     - Fill address fields
+     - Test ZIP code validation (5-6 digits)
+     - Select country from dropdown
+     - Click Submit → Success dialog with complete summary
+   - Test Back button → Returns to previous step
+   - Test step tapping → Jump to any step directly
+
+4. **Test Real-Time Validation**:
+   - Start typing in any field
+   - Error messages appear/disappear as you type
+   - Character counters update live
+   - Password visibility toggles work
+   - Input formatters prevent invalid characters
+
+5. **Test Form Reset**:
+   - Fill out form partially
+   - Click "Reset Form" button
+   - All fields clear
+   - Validation resets
+   - Ready for new input
+
+### 💡 Best Practices Demonstrated
+
+✅ **Auto-validation Mode**: Form validates on blur after first submit attempt  
+✅ **Password Visibility Toggles**: User-friendly password entry  
+✅ **Character Counters**: Show current/max characters (e.g., "25/50")  
+✅ **Helper Text**: Display field requirements  
+✅ **Input Formatters**: Prevent invalid input (e.g., letters in phone field)  
+✅ **Success Feedback**: Show submitted data in dialog  
+✅ **Form State Management**: Proper controller disposal  
+✅ **User-Friendly Errors**: Clear, actionable error messages  
+✅ **Visual Hierarchy**: Group related fields  
+✅ **Responsive Layout**: Works on all screen sizes  
+
+### 🎓 Key Concepts Learned
+
+1. **Form Widget**: Container for managing form state
+2. **GlobalKey<FormState>**: Access form methods like `validate()` and `reset()`
+3. **TextFormField**: TextField with built-in validation
+4. **Validators**: Functions returning null (valid) or error string (invalid)
+5. **Input Formatters**: Filter/transform input in real-time
+6. **Cross-Field Validation**: Compare multiple field values
+7. **AutovalidateMode**: Control when validation runs
+8. **Stepper Widget**: Multi-step form UI with progress tracking
+9. **Form State Management**: Handle complex form states
+10. **Reusable Validators**: Create validator library for consistency
+
+### 📁 Files Created
+
+**New Files:**
+- `lib/screens/forms_validation_demo.dart` - Comprehensive validation demo (450+ lines)
+- `lib/screens/multi_step_form_demo.dart` - Multi-step form example (500+ lines)
+- `lib/utils/form_validators.dart` - Reusable validators library (300+ lines)
+
+**Modified Files:**
+- `lib/main.dart` - Added routes and navigation buttons
+- `README.md` - Documentation and usage guide
+
+### 🐛 Common Issues & Solutions
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Validators not triggered | Missing `Form` widget or key | Wrap fields in `Form` with `GlobalKey` |
+| Errors not showing | Using `TextField` instead of `TextFormField` | Use `TextFormField` |
+| Submit works with invalid data | Not calling `validate()` | Check `_formKey.currentState!.validate()` |
+| Regex not matching | Wrong pattern | Test regex at regex101.com |
+| Multi-field validation failing | Using local variables | Use `TextEditingController` or state variables |
+| AutovalidateMode not working | Wrong enum value | Use `AutovalidateMode.always` or `.disabled` |
+| Form state not resetting | Not clearing controllers | Call `controller.clear()` on all controllers |
+| Memory leaks | Not disposing controllers | Always dispose controllers in `dispose()` |
+
+### 📚 Resources
+
+- [Flutter Forms Documentation](https://docs.flutter.dev/cookbook/forms)
+- [Form Validation Guide](https://docs.flutter.dev/cookbook/forms/validation)
+- [Input Formatters](https://api.flutter.dev/flutter/services/TextInputFormatter-class.html)
+- [Regular Expression Playground](https://regex101.com/)
+- [Material Design Forms](https://m3.material.io/components/text-fields/overview)
+
+---
+
+## �🗺️ Google Maps SDK Integration
 
 ### ✨ Features Implemented
 - ✅ **Interactive Google Maps**: Pan, zoom, and explore with native map controls
