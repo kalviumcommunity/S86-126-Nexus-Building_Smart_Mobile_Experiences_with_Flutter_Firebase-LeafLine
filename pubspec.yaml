@@ -36,6 +36,9 @@ dependencies:
   # Location services
   location: ^5.0.0
   geolocator: ^10.1.0
+  
+  # State management
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

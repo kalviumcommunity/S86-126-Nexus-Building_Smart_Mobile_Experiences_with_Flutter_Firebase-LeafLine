@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/login_screen.dart';
 import 'screens/responsive_home.dart';
@@ -20,9 +21,13 @@ import 'screens/push_notifications_demo_screen.dart';
 import 'screens/firestore_security_demo_screen.dart';
 import 'screens/google_maps_demo_screen.dart';
 import 'screens/crud_demo_screen.dart';
+import 'screens/provider_crud_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
+import 'providers/items_provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/favorites_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,27 +46,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const WelcomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/responsive': (context) => const ResponsiveHome(),
-        '/widgetTree': (context) => const WidgetTreeDemo(),
-        '/stateDemo': (context) => const StatelessStatefulDemo(),
-        '/scrollable': (context) => const ScrollableViews(),
-        '/userForm': (context) => const UserInputForm(),
-        '/stateManagement': (context) => const StateManagementDemo(),
-        '/assets': (context) => const AssetDemo(),
-        '/animations': (context) => const AnimationDemoScreen(),
-        '/explicitAnimations': (context) => const ExplicitAnimationDemo(),
-        '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
-        '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
-        '/firestoreSecurity': (context) => const FirestoreSecurityDemoScreen(),
-        '/googleMaps': (context) => const GoogleMapsDemoScreen(),
-        '/crudDemo': (context) => const CrudDemoScreen(),
-      },
+    // Wrap the app with MultiProvider for state management
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ItemsProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const WelcomeScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/responsive': (context) => const ResponsiveHome(),
+          '/widgetTree': (context) => const WidgetTreeDemo(),
+          '/stateDemo': (context) => const StatelessStatefulDemo(),
+          '/scrollable': (context) => const ScrollableViews(),
+          '/userForm': (context) => const UserInputForm(),
+          '/stateManagement': (context) => const StateManagementDemo(),
+          '/assets': (context) => const AssetDemo(),
+          '/animations': (context) => const AnimationDemoScreen(),
+          '/explicitAnimations': (context) => const ExplicitAnimationDemo(),
+          '/cloudFunctions': (context) => const CloudFunctionsDemoScreen(),
+          '/pushNotifications': (context) => const PushNotificationsDemoScreen(),
+          '/firestoreSecurity': (context) => const FirestoreSecurityDemoScreen(),
+          '/googleMaps': (context) => const GoogleMapsDemoScreen(),
+          '/crudDemo': (context) => const CrudDemoScreen(),
+          '/providerCrud': (context) => const ProviderCrudScreen(),
+        },
+      ),
     );
   }
 }
@@ -905,6 +919,75 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.indigo,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Provider State Management CRUD Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.blue.shade600,
+                                  Colors.cyan.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.layers, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '🚀 Provider State Management',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Scalable State with Provider + Forms',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const ProviderCrudScreen(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.account_tree),
+                                  label: const Text('Open Provider CRUD'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.blue,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 24,
                                       vertical: 12,
