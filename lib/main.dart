@@ -29,12 +29,16 @@ import 'screens/basic_tab_navigation_screen.dart';
 import 'screens/pageview_navigation_screen.dart';
 import 'screens/indexed_stack_navigation_screen.dart';
 import 'screens/material3_navigation_screen.dart';
+import 'screens/theme_settings_screen.dart';
+import 'screens/theme_demo_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
+import 'utils/app_themes.dart';
 import 'providers/items_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/favorites_provider.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,14 +60,23 @@ class MyApp extends StatelessWidget {
     // Wrap the app with MultiProvider for state management
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ItemsProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: '/',
-        routes: {
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            
+            // Theme Configuration
+            theme: AppThemes.lightTheme,
+            darkTheme: AppThemes.darkTheme,
+            themeMode: themeProvider.themeMode,
+            
+            initialRoute: '/',
+            routes: {
           '/': (context) => const WelcomeScreen(),
           '/login': (context) => const LoginScreen(),
           '/responsive': (context) => const ResponsiveHome(),
@@ -88,6 +101,10 @@ class MyApp extends StatelessWidget {
           '/pageViewNavigation': (context) => const PageViewNavigationScreen(),
           '/indexedStackNavigation': (context) => const IndexedStackNavigationScreen(),
           '/material3Navigation': (context) => const Material3NavigationScreen(),
+          '/themeSettings': (context) => const ThemeSettingsScreen(),
+          '/themeDemo': (context) => const ThemeDemoScreen(),
+            },
+          );
         },
       ),
     );
@@ -190,6 +207,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         title: const Text('LeafLine - Widget Tree Demo'),
         backgroundColor: backgroundColor,
         actions: [
+          // Theme Settings Icon
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/themeSettings');
+            },
+            icon: const Icon(Icons.brightness_6),
+            tooltip: 'Theme Settings',
+          ),
           AnimatedRotation(
             duration: const Duration(milliseconds: 300),
             turns: clicked ? 0.5 : 0.0,
@@ -1227,6 +1252,93 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                     foregroundColor: Colors.purple,
                                   ),
                                   child: const Text('Explicit Animations'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Theme & Styling Demo Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.teal.shade600,
+                                  Colors.green.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.teal.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.palette, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '🎨 Theme & Dark Mode',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Custom Themes, Dark Mode & Material 3',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/themeDemo');
+                                      },
+                                      icon: const Icon(Icons.brightness_6, size: 20),
+                                      label: const Text('Theme Demo'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.teal,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/themeSettings');
+                                      },
+                                      icon: const Icon(Icons.settings, size: 20),
+                                      label: const Text('Settings'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        foregroundColor: Colors.green,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
