@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/loading_state_widget.dart';
+import '../widgets/error_state_widget.dart';
+import '../widgets/empty_state_widget.dart';
 
 class QueryFilterDemoScreen extends StatefulWidget {
   const QueryFilterDemoScreen({super.key});
@@ -427,68 +430,30 @@ class _QueryFilterDemoScreenState extends State<QueryFilterDemoScreen> {
               builder: (context, snapshot) {
                 // Loading state
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Loading tasks...'),
-                      ],
-                    ),
-                  );
+                  return const LoadingStateWidget(message: 'Loading tasks...');
                 }
 
                 // Error state
                 if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text('Error: ${snapshot.error}'),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'This might require a Firestore index.\nCheck console for index creation link.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
+                  return ErrorStateWidget.generic(
+                    message:
+                        'This might require a Firestore index.\nCheck console for index creation link.',
+                    technicalDetails: snapshot.error.toString(),
+                    onRetry: () {
+                      setState(() {});
+                    },
                   );
                 }
 
                 // Empty state
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inbox_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No tasks found',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Try changing your filter or add some tasks',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
+                  return EmptyStateWidget.search(
+                    query: _selectedFilter != 'all' ? _selectedFilter : null,
+                    onClear: () {
+                      setState(() {
+                        _selectedFilter = 'all';
+                      });
+                    },
                   );
                 }
 

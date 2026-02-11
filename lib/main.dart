@@ -31,6 +31,7 @@ import 'screens/indexed_stack_navigation_screen.dart';
 import 'screens/material3_navigation_screen.dart';
 import 'screens/theme_settings_screen.dart';
 import 'screens/theme_demo_screen.dart';
+import 'screens/state_handling_demo_screen.dart';
 import 'services/notification_service.dart';
 import 'widgets/primary_button.dart';
 import 'utils/page_transitions.dart';
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
           '/material3Navigation': (context) => const Material3NavigationScreen(),
           '/themeSettings': (context) => const ThemeSettingsScreen(),
           '/themeDemo': (context) => const ThemeDemoScreen(),
+          '/stateHandling': (context) => const StateHandlingDemoScreen(),
             },
           );
         },
@@ -1339,6 +1341,71 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                       ),
                                     ),
                                   ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // State Handling Demo Section
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.blue.shade600,
+                                  Colors.indigo.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.tips_and_updates, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '📊 State Handling',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Loading, Error & Empty States',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/stateHandling');
+                                  },
+                                  icon: const Icon(Icons.grid_view, size: 20),
+                                  label: const Text('View Demo'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.blue,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
