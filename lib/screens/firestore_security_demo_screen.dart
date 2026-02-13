@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Firestore Security Demo Screen
-/// 
+///
 /// Demonstrates:
 /// 1. Authentication-protected Firestore operations
 /// 2. How security rules block unauthorized access
@@ -129,7 +129,7 @@ class _FirestoreSecurityDemoScreenState
         'testData': 'Initial data for ${_currentUser!.email}',
       });
 
-      _setStatus('✅ User data initialized successfully');
+      _setStatus('✅ User data initialized successfully', isError: false);
       await _loadUserData();
     } on FirebaseException catch (e) {
       _setStatus('❌ Firestore error: ${e.message}', isError: true);
@@ -146,8 +146,10 @@ class _FirestoreSecurityDemoScreenState
     setState(() => _isLoading = true);
 
     try {
-      final doc =
-          await _firestore.collection('users').doc(_currentUser!.uid).get();
+      final doc = await _firestore
+          .collection('users')
+          .doc(_currentUser!.uid)
+          .get();
 
       setState(() {
         _userData = doc.data();
@@ -187,7 +189,7 @@ class _FirestoreSecurityDemoScreenState
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      _setStatus('✅ Data written successfully');
+      _setStatus('✅ Data written successfully', isError: false);
       await _loadUserData();
     } on FirebaseException catch (e) {
       _setStatus(
@@ -213,7 +215,7 @@ class _FirestoreSecurityDemoScreenState
       // Try to access a different user's document
       const testUid = 'different-user-uid-12345';
 
-      final doc = await _firestore.collection('users').doc(testUid).get();
+      await _firestore.collection('users').doc(testUid).get();
 
       // If we reach here, security rules are NOT working properly
       _setStatus(
@@ -309,7 +311,9 @@ class _FirestoreSecurityDemoScreenState
 
             // Current User Status
             Card(
-              color: _currentUser != null ? Colors.green.shade50 : Colors.orange.shade50,
+              color: _currentUser != null
+                  ? Colors.green.shade50
+                  : Colors.orange.shade50,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -328,8 +332,13 @@ class _FirestoreSecurityDemoScreenState
                     if (_currentUser != null) ...[
                       const SizedBox(height: 8),
                       Text('Email: ${_currentUser!.email}'),
-                      Text('UID: ${_currentUser!.uid}',
-                          style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
+                      Text(
+                        'UID: ${_currentUser!.uid}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
                     ],
                   ],
                 ),
@@ -342,9 +351,9 @@ class _FirestoreSecurityDemoScreenState
               Text(
                 'Step 1: Authenticate',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -402,9 +411,9 @@ class _FirestoreSecurityDemoScreenState
               Text(
                 'Step 2: Test Firestore Access',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -518,7 +527,9 @@ class _FirestoreSecurityDemoScreenState
             if (_statusMessage.isNotEmpty) ...[
               const SizedBox(height: 20),
               Card(
-                color: _statusMessage.contains('❌') || _statusMessage.contains('⚠️')
+                color:
+                    _statusMessage.contains('❌') ||
+                        _statusMessage.contains('⚠️')
                     ? Colors.red.shade50
                     : Colors.green.shade50,
                 child: Padding(
@@ -528,7 +539,8 @@ class _FirestoreSecurityDemoScreenState
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
-                      color: _statusMessage.contains('❌') ||
+                      color:
+                          _statusMessage.contains('❌') ||
                               _statusMessage.contains('⚠️')
                           ? Colors.red.shade900
                           : Colors.green.shade900,
