@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../utils/form_validators.dart';
 
 /// Multi-Step Form Demo
-/// 
+///
 /// Demonstrates:
 /// - Multi-step form flow with Stepper widget
 /// - Step-by-step validation
@@ -120,10 +120,8 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
               border: OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
-            validator: (value) => FormValidators.validateRequired(
-              value,
-              fieldName: 'First name',
-            ),
+            validator: (value) =>
+                FormValidators.validateRequired(value, fieldName: 'First name'),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -135,10 +133,8 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
               border: OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
-            validator: (value) => FormValidators.validateRequired(
-              value,
-              fieldName: 'Last name',
-            ),
+            validator: (value) =>
+                FormValidators.validateRequired(value, fieldName: 'Last name'),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
@@ -150,10 +146,7 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
             ),
             hint: const Text('Select gender'),
             items: _genders.map((gender) {
-              return DropdownMenuItem(
-                value: gender,
-                child: Text(gender),
-              );
+              return DropdownMenuItem(value: gender, child: Text(gender));
             }).toList(),
             onChanged: (value) => setState(() => _selectedGender = value),
             validator: (value) {
@@ -239,12 +232,13 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
             validator: (value) => FormValidators.combine([
               (v) => FormValidators.validateRequired(v, fieldName: 'Username'),
               (v) => FormValidators.validateLengthRange(
-                    v,
-                    4,
-                    20,
-                    fieldName: 'Username',
-                  ),
-              (v) => FormValidators.validateAlphanumeric(v, fieldName: 'Username'),
+                v,
+                4,
+                20,
+                fieldName: 'Username',
+              ),
+              (v) =>
+                  FormValidators.validateAlphanumeric(v, fieldName: 'Username'),
             ])(value),
           ),
           const SizedBox(height: 16),
@@ -267,10 +261,8 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
               helperMaxLines: 2,
             ),
             obscureText: _obscurePassword,
-            validator: (value) => FormValidators.validatePassword(
-              value,
-              minLength: 8,
-            ),
+            validator: (value) =>
+                FormValidators.validatePassword(value, minLength: 8),
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -286,8 +278,9 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
                       : Icons.visibility_off,
                 ),
                 onPressed: () {
-                  setState(() =>
-                      _obscureConfirmPassword = !_obscureConfirmPassword);
+                  setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  );
                 },
               ),
               border: const OutlineInputBorder(),
@@ -345,10 +338,8 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
                     border: OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
-                  validator: (value) => FormValidators.validateRequired(
-                    value,
-                    fieldName: 'City',
-                  ),
+                  validator: (value) =>
+                      FormValidators.validateRequired(value, fieldName: 'City'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -386,13 +377,15 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
                     LengthLimitingTextInputFormatter(6),
                   ],
                   validator: (value) => FormValidators.combine([
-                    (v) =>
-                        FormValidators.validateRequired(v, fieldName: 'ZIP Code'),
+                    (v) => FormValidators.validateRequired(
+                      v,
+                      fieldName: 'ZIP Code',
+                    ),
                     (v) => FormValidators.validateMinLength(
-                          v,
-                          5,
-                          fieldName: 'ZIP Code',
-                        ),
+                      v,
+                      5,
+                      fieldName: 'ZIP Code',
+                    ),
                   ])(value),
                 ),
               ),
@@ -412,7 +405,8 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
                       child: Text(country),
                     );
                   }).toList(),
-                  onChanged: (value) => setState(() => _selectedCountry = value),
+                  onChanged: (value) =>
+                      setState(() => _selectedCountry = value),
                   validator: (value) {
                     if (value == null) {
                       return 'Select country';
@@ -549,10 +543,12 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
             ),
           ),
           const SizedBox(height: 4),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(left: 8, top: 2),
-                child: Text(item, style: const TextStyle(fontSize: 13)),
-              )),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(left: 8, top: 2),
+              child: Text(item, style: const TextStyle(fontSize: 13)),
+            ),
+          ),
         ],
       ),
     );
@@ -588,12 +584,27 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Multi-Step Form'),
-        elevation: 2,
-      ),
+      appBar: AppBar(title: const Text('Multi-Step Form'), elevation: 2),
       body: Column(
         children: [
+          if (_isComplete)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.green.shade50,
+              child: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Form completed. Tap Finish to start over.',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Progress Indicator
           LinearProgressIndicator(
             value: (_currentStep + 1) / 3,
@@ -624,7 +635,9 @@ class _MultiStepFormDemoState extends State<MultiStepFormDemo> {
                         flex: _currentStep > 0 ? 1 : 2,
                         child: ElevatedButton(
                           onPressed: details.onStepContinue,
-                          child: Text(_currentStep == 2 ? 'Submit' : 'Continue'),
+                          child: Text(
+                            _currentStep == 2 ? 'Submit' : 'Continue',
+                          ),
                         ),
                       ),
                     ],

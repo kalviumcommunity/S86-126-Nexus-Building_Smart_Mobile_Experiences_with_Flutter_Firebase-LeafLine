@@ -21,7 +21,6 @@ class _StorageUploadScreenState extends State<StorageUploadScreen> {
   File? _selectedFile;
   bool _isUploading = false;
   double _uploadProgress = 0.0;
-  String? _uploadedUrl;
   String? _errorMessage;
 
   final TextEditingController _captionController = TextEditingController();
@@ -45,7 +44,6 @@ class _StorageUploadScreenState extends State<StorageUploadScreen> {
       if (image != null) {
         setState(() {
           _selectedFile = File(image.path);
-          _uploadedUrl = null;
           _errorMessage = null;
         });
       }
@@ -69,7 +67,6 @@ class _StorageUploadScreenState extends State<StorageUploadScreen> {
       if (image != null) {
         setState(() {
           _selectedFile = File(image.path);
-          _uploadedUrl = null;
           _errorMessage = null;
         });
       }
@@ -124,7 +121,6 @@ class _StorageUploadScreenState extends State<StorageUploadScreen> {
       await _saveToFirestore(downloadUrl, fileName);
 
       setState(() {
-        _uploadedUrl = downloadUrl;
         _isUploading = false;
         _selectedFile = null;
         _captionController.clear();

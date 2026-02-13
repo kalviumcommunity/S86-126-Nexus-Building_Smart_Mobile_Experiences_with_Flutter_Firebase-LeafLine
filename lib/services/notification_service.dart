@@ -13,7 +13,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 /// Notification Service for Firebase Cloud Messaging
-/// 
+///
 /// Handles all FCM operations:
 /// - Requesting permissions
 /// - Receiving foreground messages
@@ -52,7 +52,7 @@ class NotificationService {
     try {
       // Request notification permissions
       final settings = await _requestPermission();
-      
+
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         if (kDebugMode) {
           print('✅ User granted notification permission');
@@ -123,7 +123,9 @@ class NotificationService {
 
   /// Initialize local notifications plugin
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -152,7 +154,8 @@ class NotificationService {
 
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
   }
 
@@ -202,8 +205,8 @@ class NotificationService {
 
   /// Handle message when app was terminated
   Future<void> _setupTerminatedMessageHandler() async {
-    RemoteMessage? initialMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance
+        .getInitialMessage();
 
     if (initialMessage != null) {
       if (kDebugMode) {
@@ -220,7 +223,6 @@ class NotificationService {
   /// Show local notification for foreground messages
   Future<void> _showLocalNotification(RemoteMessage message) async {
     RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
 
     if (notification != null) {
       await _localNotifications.show(
